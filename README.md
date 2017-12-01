@@ -22,8 +22,8 @@ License
 Update
 ======
 
-    Version: v0p0_LTE
-    Last Update Time: 20171201pm2308
+    Version: v0p1_LTE
+    Last Update Time: 20171201pm2320
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 
@@ -49,13 +49,19 @@ Platform
 
 Run
 ======
-    python2 version:
+
+    last python2 version:
+    
 - [pixiv-crawler](https://github.com/Neod0Matrix/pixiv-crawler)
+    
     git clone https://github.com/Neod0Matrix/pixiv-crawler.git
+    
+    this python3 version:
 
 - [pixiv-crawler3](https://github.com/Neod0Matrix/pixiv-crawler3)
-    git clone https://github.com/Neod0Matrix/pixiv-crawler3.git
 
+    git clone https://github.com/Neod0Matrix/pixiv-crawler3.git
+    
     cd pixiv-crawler3
     
     First config your local folder in pllc.py and login.cr

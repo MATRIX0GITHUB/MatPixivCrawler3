@@ -6,12 +6,12 @@
 
 import urllib.request, urllib.parse, urllib.error, http.cookiejar
 import time, random, re, os
-import pllc
 from bs4 import BeautifulSoup
 import threading
 from PIL import Image
 from collections import OrderedDict
 from retrying import retry
+import pllc
 
 proxyHascreated = False                                             # global var init value
 
@@ -26,7 +26,7 @@ class Matrix:
         #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝     #
         #                                                                                                               #
         #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                               #
-        #    Version: 0.0.0 LTE                                                                                         #
+        #    Version: 0.1.0 LTE                                                                                         #
         #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                   #
         #    MatPixivCrawler Help Page                                                                                  #
         #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                              #
