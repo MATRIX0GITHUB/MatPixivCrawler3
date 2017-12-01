@@ -36,10 +36,10 @@ class Matrix:
     """
     def __init__(self):
         # from first login save cookie and create global opener
-        self.cookie = http.cookiejar.LWPCookieJar()                      # create a cookie words
+        self.cookie = http.cookiejar.LWPCookieJar()                 # create a cookie words
         self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie) # add http cookie words
-        self.opener = urllib.request.build_opener(self.cookieHandler)      # build the opener
-        urllib.request.install_opener(self.opener)                         # install it
+        self.opener = urllib.request.build_opener(self.cookieHandler) # build the opener
+        urllib.request.install_opener(self.opener)                  # install it
 
     @staticmethod
     def logprowork(logpath, savecontent):
@@ -207,7 +207,7 @@ class Matrix:
         headers = pllc.build_original_headers(basepages[index])
         list_headers = pllc.dict_transto_list(headers)
         self.opener.addheaders = list_headers
-        urllib.request.install_opener(self.opener)                         # must install new
+        urllib.request.install_opener(self.opener)                  # must install new
         response = None
 
         try:
@@ -245,7 +245,7 @@ class Matrix:
             else:
                 logContext = "change proxy server"
                 self.logprowork(logpath, logContext)
-                self.opener = urllib.request.build_opener(proxy_handler)   # add proxy handler
+                self.opener = urllib.request.build_opener(proxy_handler) # add proxy handler
                 response = self.opener.open(fullurl=url,
                                             timeout=timeout)
 
@@ -316,7 +316,7 @@ class Matrix:
             sub_thread = self.MultiThreading(lock, i, img_url, base_pages, workdir, logpath)
             sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
             sub_thread.start()                                      # start download
-            time.sleep(0.5)                                         # confirm thread has been created
+            time.sleep(0.7)                                         # confirm thread has been created
         # parent thread wait all sub-thread end
         aliveThreadCnt = threading.active_count()
         while aliveThreadCnt != 1:                                  # finally only parent process
@@ -339,7 +339,7 @@ class Matrix:
             :param logpath:     log save path
             :return:            none
         """
-        htmlFile = open(htmlpath, "w")                             # write html file
+        htmlFile = open(htmlpath, "w")                              # write html file
         # build html background page text
         htmlFile.writelines("<html>\r\n<head>\r\n<title>pixiv-crawler(MatPixivCrawler) ResultPage</title>\r\n</head>\r\n<body>\r\n")
         htmlFile.writelines("<script>window.onload = function(){"
@@ -382,7 +382,7 @@ class Matrix:
             + ' technology support\n'                                   \
             'Code by ' + pllc.__organization__ + '@' + pllc.__author__
         self.logprowork(logpath, logContext)
-        os.system(pllc.platform_filemanager() + ' ' + pllc.work_dir)        # open file-manager to check result
+        os.system(pllc.platform_filemanager() + ' ' + pllc.work_dir) # open file-manager to check result
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
