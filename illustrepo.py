@@ -12,15 +12,15 @@ pvmx = privmatrix.Matrix()
 
 class IllustratorRepos(object):
     """
-        every illustrator in Pixiv has own mainpage
-        this class include fuction will crawl all of those page all images
+    every illustrator in Pixiv has own mainpage
+    this class include fuction will crawl all of those page all images
     """
     def __init__(self, iid, workdir, logname, htmlname):
         """
-            :param iid:         illustrator id
-            :param workdir:     work directory
-            :param logname:     log name
-            :param htmlname:    html name
+        :param iid:         illustrator id
+        :param workdir:     work directory
+        :param logname:     log name
+        :param htmlname:    html name
         """
         self.illustInputID = iid
         self.workdir = workdir + self.illustInputID
@@ -29,16 +29,16 @@ class IllustratorRepos(object):
 
     def gather_preloadinfo(self, logpath):
         """
-            crawler need to know how many images do you want
-            :param self:    self class
-            :param logpath: log save path
-            :return:        request images count
+        crawler need to know how many images do you want
+        :param self:    self class
+        :param logpath: log save path
+        :return:        request images count
         """
-        # get illust artwork count mainpage url
+        # get illust artwork whole count mainpage url
         cnt_url = dataload.mainPage + self.illustInputID
         response = pvmx.opener.open(fullurl=cnt_url,
-                                    data=dataload.login_data[2],
-                                    timeout=300)
+                                    data=pvmx.getData,
+                                    timeout=30)
         web_src = response.read().decode("UTF-8", "ignore")
 
         # mate illustrator name
@@ -52,27 +52,27 @@ class IllustratorRepos(object):
 
         # input want image count
         capCnt = int(input(dataload.SHELLHEAD
-                           + 'enter you want to crawl image count(all repo have %d, each page at most 20 images): ' % maxCnt))
+                           + 'gather whole repo %d images, enter you want to crawl image count: ' % maxCnt))
         # count error
         while (capCnt > maxCnt) or (capCnt <= 0):
             capCnt = int(input(dataload.SHELLHEAD
                                + 'error, input count must <= %d and not 0: ' % maxCnt))
-        logContext = "check gather illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
+        logContext = "check crawl illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
         pvmx.logprowork(logpath, logContext)
 
         return capCnt, arthor_name
 
     def crawl_onepage_data(self, array, logpath):
         """
-            crawl all target url about images
-            page request regular:
-            no.1 referer: &type=all request url: &type=all&p=2
-            no.2 referer: &type=all&p=2 request url: &type=all&p=3
-            no.3 referer: &type=all&p=3 request url: &type=all&p=4
-            :param self:    self class
-            :param array:   count cut to every 20 images from each page, they have an array
-            :param logpath: log save path
-            :return:        use regex to mate web src thumbnail images url
+        crawl all target url about images
+        page request regular:
+        no.1 referer: &type=all request url: &type=all&p=2
+        no.2 referer: &type=all&p=2 request url: &type=all&p=3
+        no.3 referer: &type=all&p=3 request url: &type=all&p=4
+        :param self:    self class
+        :param array:   count cut to every 20 images from each page, they have an array
+        :param logpath: log save path
+        :return:        use regex to mate web src thumbnail images url
         """
         step1url = dataload.mainPage + self.illustInputID + dataload.mainPagemiddle
         if array == 1:
@@ -82,8 +82,8 @@ class IllustratorRepos(object):
         else:
             urlTarget = step1url + dataload.mainPagetail + str(array)
         response = pvmx.opener.open(fullurl=urlTarget,
-                                    data=dataload.login_data[2],
-                                    timeout=300)
+                                    data=pvmx.getData,
+                                    timeout=30)
         if response.getcode() == dataload.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
@@ -110,12 +110,12 @@ class IllustratorRepos(object):
 
     def crawl_allpage_target(self, nbr, arthor_name, logpath):
         """
-            package all gather url
-            :param self:        self class
-            :param nbr:         package images count
-            :param arthor_name: arthor name
-            :param logpath:     log save path
-            :return:            build original images urls list
+        package all gather url
+        :param self:        self class
+        :param nbr:         package images count
+        :param arthor_name: arthor name
+        :param logpath:     log save path
+        :return:            build original images urls list
         """
         # calcus nbr need request count
         if nbr <= 20:
@@ -159,8 +159,8 @@ class IllustratorRepos(object):
 
     def start(self):
         """
-            include this class run logic
-            :return:    none
+        include this class run logic
+        :return:    none
         """
         pvmx.mkworkdir(self.logpath, self.workdir)
 

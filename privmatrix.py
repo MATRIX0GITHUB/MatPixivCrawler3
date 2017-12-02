@@ -26,7 +26,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 0.3.0 LTE                                                                                                             #
+    #    Version: 0.4.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -36,6 +36,7 @@ class Matrix:
     """
     def __init__(self):
         # from first login save cookie and create global opener
+        self.getData = dataload.loginData[2]                        # request images and pages GET way
         self.cookie = http.cookiejar.LWPCookieJar()                 # create a cookie words
         self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib.request.build_opener(self.cookieHandler) # build the opener
@@ -44,23 +45,23 @@ class Matrix:
     @staticmethod
     def logprowork(logpath, savecontent):
         """
-            universal work log save
-            :param logpath: log save path
-            :param savecontent: log save content
-            :return:        none
+        universal work log save
+        :param logpath:     log save path
+        :param savecontent: log save content
+        :return:            none
         """
         # this log file must be a new file
         logFile = open(logpath, 'a+', encoding='utf-8')             # add context to file option 'a+'
-        print(dataload.SHELLHEAD + savecontent)                         # with shell header
-        print(dataload.SHELLHEAD + savecontent, file=logFile)           # write to log
+        print(dataload.SHELLHEAD + savecontent)                     # with shell header
+        print(dataload.SHELLHEAD + savecontent, file=logFile)       # write to log
 
     def mkworkdir(self, logpath, folder):
         """
-            create a crawler work directory
-            :param self:    self class
-            :param logpath: log save path
-            :param folder:  folder create path
-            :return:        folder create path
+        create a crawler work directory
+        :param self:    self class
+        :param logpath: log save path
+        :param folder:  folder create path
+        :return:        folder create path
         """
         # create a folder to save picture
         isFolderExisted = os.path.exists(folder)
@@ -79,9 +80,9 @@ class Matrix:
 
     def getproxyserver(self, logpath):
         """
-            catch a proxy server when crwaler crawl many times website forbidden host ip
-            :param logpath: log save path
-            :return:        proxy server, add to opener
+        catch a proxy server when crwaler crawl many times website forbidden host ip
+        :param logpath: log save path
+        :return:        proxy server, add to opener
         """
         req_ps_url = dataload.proxyServerRequestURL
         psHeaders = {}
@@ -117,8 +118,8 @@ class Matrix:
 
     def gatherpostkey(self, logpath):
         """
-            POST way login need post-key
-            :return:    post way request data
+        POST way login need post-key
+        :return:    post way request data
         """
         # request a post key
         response = self.opener.open(dataload.postKeyGeturl, timeout=40)
@@ -140,8 +141,8 @@ class Matrix:
 
         # build basic dict
         postTabledict = OrderedDict()                               # this post data must has a order
-        postTabledict['pixiv_id'] = dataload.login_data[0]
-        postTabledict['password'] = dataload.login_data[1]
+        postTabledict['pixiv_id'] = dataload.loginData[0]
+        postTabledict['password'] = dataload.loginData[1]
         postTabledict['captcha'] = ""
         postTabledict['g_recaptcha_response'] = ""
         postTabledict['post_key'] = postKey
@@ -155,9 +156,9 @@ class Matrix:
 
     def camouflage_login(self, logpath):
         """
-            camouflage browser to login
-            :param logpath: log save path
-            :return:        none
+        camouflage browser to login
+        :param logpath: log save path
+        :return:        none
         """
         # login init need to commit post data to Pixiv
         postData = self.gatherpostkey(logpath)                      # get post-key and build post-data
@@ -172,7 +173,14 @@ class Matrix:
         self.logprowork(logpath, logContext)
 
     def save_test_html(self, workdir, content, logpath):
-        htmlfile = open(workdir + dataload.symbol + 'test.html', "wb")
+        """
+        save request web source page in a html file, test use
+        :param workdir: work directory
+        :param content: save content
+        :param logpath: log save path
+        :return:        none
+        """
+        htmlfile = open(workdir + dataload.symbol + 'test.html', "w")
         htmlfile.write(content)
         htmlfile.close()
         logContext = 'save request html page ok'
@@ -181,14 +189,14 @@ class Matrix:
     @retry
     def save_oneimage(self, index, url, basepages, savepath, logpath):
         """
-            download one target image, then multi-process will call here
-            add retry decorator, if first try failed, it will auto-retry
-            :param index:       image index
-            :param url:         image urls list
-            :param basepages:   referer basic pages list
-            :param savepath:    image save path
-            :param logpath:     log save path
-            :return:            none
+        download one target image, then multi-process will call here
+        add retry decorator, if first try failed, it will auto-retry
+        :param index:       image index
+        :param url:         image urls list
+        :param basepages:   referer basic pages list
+        :param savepath:    image save path
+        :param logpath:     log save path
+        :return:            none
         """
         # set images download arguments
         timeout = 30                                                # default set to 30s
@@ -262,19 +270,19 @@ class Matrix:
 
     class MultiThreading(threading.Thread):
         """
-            overrides its run method by inheriting the Thread class
-            this class can be placed outside the main class, you can also put inside
-            threads are the smallest unit of program execution flow that is less burdensome than process creation
+        overrides its run method by inheriting the Thread class
+        this class can be placed outside the main class, you can also put inside
+        threads are the smallest unit of program execution flow that is less burdensome than process creation
         """
         def __init__(self, lock, i, img_url, base_pages, imgPath, logPath):
             """
-                commit class arguments
-                :param lock:        object lock
-                :param i:           image index
-                :param img_url:     image url
-                :param base_pages:  referer basic page
-                :param imgPath:     image save path
-                :param logPath:     log save path
+            commit class arguments
+            :param lock:        object lock
+            :param i:           image index
+            :param img_url:     image url
+            :param base_pages:  referer basic page
+            :param imgPath:     image save path
+            :param logPath:     log save path
             """
             # callable class init
             threading.Thread.__init__(self)
@@ -288,7 +296,7 @@ class Matrix:
 
         def run(self):
             """
-                overwrite threading.thread run() method
+            overwrite threading.thread run() method
             :return:    none
             """
             # cancel lock release will let multi-process change to easy process
@@ -298,13 +306,13 @@ class Matrix:
 
     def download_alltarget(self, urls, base_pages, workdir, logpath):
         """
-            multi-process download all image
-            test speed: daily-rank top 50 whole crawl elapsed time 1min
-            :param urls:        all original images urls
-            :param base_pages:   all referer basic pages
-            :param workdir:     work directory
-            :param logpath:     log save path
-            :return:            none
+        multi-process download all image
+        test speed: daily-rank top 50 whole crawl elapsed time 1min
+        :param urls:        all original images urls
+        :param base_pages:   all referer basic pages
+        :param workdir:     work directory
+        :param logpath:     log save path
+        :return:            none
         """
         logContext = 'start to download target(s)======>'
         self.logprowork(logpath, logContext)
@@ -332,12 +340,12 @@ class Matrix:
 
     def htmlpreview_build(self, workdir, htmlpath, logpath):
         """
-            build a html file to browse image
-            :param self:        class self
-            :param workdir:     work directory
-            :param htmlpath:    html file save path
-            :param logpath:     log save path
-            :return:            none
+        build a html file to browse image
+        :param self:        class self
+        :param workdir:     work directory
+        :param htmlpath:    html file save path
+        :param logpath:     log save path
+        :return:            none
         """
         htmlFile = open(htmlpath, "w")                              # write html file
         # build html background page text
@@ -369,9 +377,9 @@ class Matrix:
 
     def work_finished(self, logpath):
         """
-            work finished log
-            :param logpath: log save path
-            :return:        none
+        work finished log
+        :param logpath: log save path
+        :return:        none
         """
         rtc = time.localtime()                                      # real log get
         ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])

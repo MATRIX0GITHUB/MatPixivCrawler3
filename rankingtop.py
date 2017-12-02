@@ -12,14 +12,14 @@ pvmx = privmatrix.Matrix()
 
 class DWMRankingTop(object):
     """
-        Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
-        this class include fuction will gather all of those rank
+    Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
+    this class include fuction will gather all of those rank
     """
     def __init__(self, workdir, logpath, htmlpath):
         """
-            :param workdir:     work directory
-            :param logpath:     log save path
-            :param htmlpath:    html save path
+        :param workdir:     work directory
+        :param logpath:     log save path
+        :param htmlpath:    html save path
         """
         self.workdir = workdir
         self.logpath = logpath
@@ -28,10 +28,10 @@ class DWMRankingTop(object):
     @staticmethod
     def gather_essential_info(work_dir, logpath):
         """
-            get input image count
-            :param work_dir:    work directory
-            :param logpath:     log save path
-            :return:            crawl images count
+        get input image count
+        :param work_dir:    work directory
+        :param logpath:     log save path
+        :return:            crawl images count
         """
         # first create folder
         pvmx.mkworkdir(logpath, work_dir)
@@ -62,11 +62,11 @@ class DWMRankingTop(object):
 
     def gather_rankingdata(self, ormode, img_nbr):
         """
-            crawl dailyRank list
-            :param self:    self class
-            :param ormode:  oridinary mode or R18 mode
-            :param img_nbr: images request count
-            :return:        original images urls list
+        crawl dailyRank list
+        :param self:    self class
+        :param ormode:  oridinary mode or R18 mode
+        :param img_nbr: images request count
+        :return:        original images urls list
         """
         logContext = 'gather rank list======>'
         pvmx.logprowork(self.logpath, logContext)
@@ -102,8 +102,8 @@ class DWMRankingTop(object):
             print(dataload.SHELLHEAD + "argv(s) error\n")
         pvmx.logprowork(self.logpath, logContext)
         response = pvmx.opener.open(fullurl=page_url,
-                                    data=dataload.login_data[2],
-                                    timeout=300)
+                                    data=pvmx.getData,
+                                    timeout=30)
         if response.getcode() == dataload.reqSuccessCode:
             logContext = 'website response successed'
         else:
@@ -140,8 +140,8 @@ class DWMRankingTop(object):
 
     def start(self):
         """
-            class main call process
-            :return:    none
+        class main call process
+        :return:    none
         """
         info = self.gather_essential_info(self.workdir, self.logpath)
 

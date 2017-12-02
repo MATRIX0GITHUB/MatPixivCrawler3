@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p3_LTE'
+__version__         = 'v0p4_LTE'
 
 import urllib.request, urllib.parse, urllib.error
 import time, os, linecache
@@ -20,14 +20,14 @@ SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux
 
 def login_infopreload():
     """
-        get user input username and password
-        login.cr file example:
-        =================================
-        [login]
-        <mail>
-        <passwd>
-        =================================
-        :return:    username, password, get data
+    get user input username and password
+    login.cr file example:
+    =================================
+    [login]
+    <mail>
+    <passwd>
+    =================================
+    :return:    username, password, get data
     """
     print("###################################login data check###################################")
     loginFilePath = os.getcwd() + '/' + 'login.cr'                  # get local dir path
@@ -65,7 +65,7 @@ def login_infopreload():
     getData = urllib.parse.urlencode(getwayRegInfo).encode(encoding='UTF8')
 
     return username, passwd, getData
-login_data = login_infopreload()                                    # preduce call once
+loginData = login_infopreload()                                    # preduce call once
 
 # ========================================some use url address=====================================================
 # login request must be https proxy format, request page or image must be http proxy
@@ -117,9 +117,9 @@ xRequestwith = "XMLHttpRequest"
 
 def dict_transto_list (input_dict):
     """
-        change dict data-type to list
-        :param input_dict:      dict
-        :return:                list
+    change dict data-type to list
+    :param input_dict:      dict
+    :return:                list
     """
     result_list = []
     for key, value in list(input_dict.items()):
@@ -130,9 +130,9 @@ def dict_transto_list (input_dict):
 
 def build_login_headers(cookie):
     """
-        build the first request login headers
-        :param cookie:  cookie
-        :return:        login headers
+    build the first request login headers
+    :param cookie:  cookie
+    :return:        login headers
     """
     # this build headers key-word is referer and user-agent
     baseHeaders = {
@@ -167,9 +167,9 @@ def build_login_headers(cookie):
 
 def build_original_headers(referer):
     """
-        original image request headers
-        :param referer: headers need a last page referer
-        :return:        build headers
+    original image request headers
+    :param referer: headers need a last page referer
+    :return:        build headers
     """
     baseHeaders = {
         'Accept': "image/webp,image/*,*/*;q=0.8",
@@ -213,8 +213,8 @@ illustAWCntRegex = 'dge">.*?<'                                      # illust art
 
 def platform_filemanager():
     """
-        define os gui file manager
-        :return:    file manager name
+    define os gui file manager
+    :return:    file manager name
     """
     fm = ''
     if os.name == 'posix':
@@ -227,9 +227,9 @@ def platform_filemanager():
 
 def setting_platform_workdir ():
     """
-        set os platform to set folder format
-        folder must with directory symbol '/' or '\\'
-        :return:    platform work directory
+    set os platform to set folder format
+    folder must with directory symbol '/' or '\\'
+    :return:    platform work directory
     """
     homeFolder = ''
     folderSymbol = ''
