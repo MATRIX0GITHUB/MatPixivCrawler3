@@ -118,23 +118,21 @@ class DWMRankingTop(object):
         targetURL = []
         for i in vwCapture[:img_nbr]:
             vaildWord = i[5:-1]                                     # pixiv may change its position sometimes
+            # build original image url format
             targetURL.append(dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail)
 
         # gather info of artworks
         infoPattern = re.compile(dataload.rankTitleRegex, re.S)
         dataCapture = re.findall(infoPattern, web_src)
 
-        logContext = 'top ' + str(img_nbr) + ' info======>'
+        logContext = 'gather rankingtop ' + str(img_nbr) + ' info======>'
         pvmx.logprowork(self.logpath, logContext)
-        aw_ids = []                                                 # artwork id
         basePages = []                                              # request original image need referer
         for k, i in enumerate(dataCapture[:img_nbr]):
-            logContext = '------------no.%s-----------' % i[0]      # artwork array
+            # rank-array    image-name  arthur-name     arthur-id   original-image-url
+            logContext = '%s name: %s illustrator: %s id: %s url: %s' % (i[0], i[1], i[2], i[4], targetURL[k])
             pvmx.logprowork(self.logpath, logContext)
-            logContext = 'name: %s illustrator: %s id: %s url: %s' % (i[1], i[2], i[4], targetURL[k])
-            pvmx.logprowork(self.logpath, logContext)
-            aw_ids.append(i[4])
-            basePages.append(dataload.baseWebURL + i[4])                # every picture url address: base_url address + picture_id
+            basePages.append(dataload.baseWebURL + i[4])            # every picture url address: base_url address + picture_id
 
         return targetURL, basePages
 
