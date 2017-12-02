@@ -8,13 +8,66 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p4_LTE'
+__version__         = 'v0p5_LTE'
 
 import urllib.request, urllib.parse, urllib.error
-import time, os, linecache
+import time, os, linecache, json
 import getpass
 
+# ======================get format time, and get year-month-date to be a folder name===============================
+# work directory
+
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
+
+def platform_filemanager():
+    """
+    define os gui file manager
+    :return:    file manager name
+    """
+    fm = ''
+    if os.name == 'posix':
+        fm = 'nautilus'
+    elif os.name == 'nt':
+        fm = 'explorer'
+    else:
+        pass
+    return fm
+
+def setting_platform_workdir ():
+    """
+    set os platform to set folder format
+    folder must with directory symbol '/' or '\\'
+    :return:    platform work directory
+    """
+    homeFolder = ''
+    folderSymbol = ''
+    # linux
+    if os.name == 'posix':
+        homeFolder = '/home/neod-anderjon/Pictures/Crawler/'
+        folderSymbol = '/'
+    # windows
+    elif os.name == 'nt':
+        homeFolder = 'E:\\Workstation_Files\\Pictures\\Comic\\IllustratorDesign\\Crawler\\'
+        folderSymbol = '\\'
+    else:
+        pass
+
+    return homeFolder, folderSymbol
+platform = setting_platform_workdir()
+work_dir = platform[0]
+symbol = platform[1]
+
+# real time clock
+rtc = time.localtime()
+ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
+
+# universal path
+logfile_name = symbol + 'CrawlerWork[%s].log' % ymd
+htmlfile_name = symbol + 'CrawlerWork[%s].html' % ymd
+ranking_folder = work_dir + 'RankTop_%s%s' % (ymd, symbol)
+# daily-rank path
+logfile_path = ranking_folder + logfile_name
+htmlfile_path = ranking_folder + htmlfile_name
 
 # ==============================================pixiv login info====================================================
 
@@ -97,6 +150,7 @@ mainPagemiddle = '&type=all'                                        # url middle
 mainPagetail = '&p='                                                # url tail word
 
 # ==================================http request headers include data============================================
+# request use data, from browser javascript or fiddler
 
 reqSuccessCode = 200
 reqNotFound = 404
@@ -128,6 +182,24 @@ def dict_transto_list (input_dict):
 
     return result_list
 
+def ucUserAgent():
+    """
+    choose platform user-agent headers
+    :return:    headers
+    """
+    uaHeadersLinux = {'User-Agent': userAgentLinux}                 # build dict word
+    uaHeadersWindows = {'User-Agent': userAgentWindows}             # build dict word
+    # platform choose
+    headers = None
+    if os.name == 'posix':
+        headers = uaHeadersLinux
+    elif os.name == 'nt':
+        headers = uaHeadersWindows
+    else:
+        pass
+
+    return headers
+
 def build_login_headers(cookie):
     """
     build the first request login headers
@@ -150,18 +222,8 @@ def build_login_headers(cookie):
         'Referer': postKeyGeturl,                                   # last page is request post-key page
         'X-Requested-With': xRequestwith,
     }
-    buildHeaders = {}
-    # platform choose
-    if os.name == 'posix':
-        buildHeaders = dict(list(baseHeaders.items()) + list({
-            'User-Agent': userAgentLinux,
-        }.items()))
-    elif os.name == 'nt':
-        buildHeaders = dict(list(baseHeaders.items()) + list({
-            'User-Agent': userAgentWindows,
-        }.items()))
-    else:
-        pass
+    # dict merge
+    buildHeaders = dict(json.loads(baseHeaders)).update(json.loads(ucUserAgent()))
 
     return buildHeaders
 
@@ -180,22 +242,13 @@ def build_original_headers(referer):
         # copy from javascript console network request headers of image
         'Referer': referer,  # request basic page
     }
-    buildHeaders = {}
-    # platform choose
-    if os.name == 'posix':
-        buildHeaders = dict(list(baseHeaders.items()) + list({
-            'User-Agent': userAgentLinux,
-        }.items()))
-    elif os.name == 'nt':
-        buildHeaders = dict(list(baseHeaders.items()) + list({
-            'User-Agent': userAgentWindows,
-        }.items()))
-    else:
-        pass
+    # dict merge
+    buildHeaders = dict(json.loads(baseHeaders)).update(json.loads(ucUserAgent()))
 
     return buildHeaders
 
 # =======================================regex collection==========================================================
+# mate web src need word strip
 
 postKeyRegex = 'key".*?"(.*?)"'                                     # mate post key
 rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
@@ -208,58 +261,6 @@ imagesNameRegex = 'e" title=".*?"'                                  # mate mainp
 proxyServerRegex = 'tr'                                             # use beautifulsoup module, easy
 arrangeProxyServerRegex = 'td'                                      # cut gather list
 illustAWCntRegex = 'dge">.*?<'                                      # illust artwork count mate
-
-# ======================get format time, and get year-month-date to be a folder name===============================
-
-def platform_filemanager():
-    """
-    define os gui file manager
-    :return:    file manager name
-    """
-    fm = ''
-    if os.name == 'posix':
-        fm = 'nautilus'
-    elif os.name == 'nt':
-        fm = 'explorer'
-    else:
-        pass
-    return fm
-
-def setting_platform_workdir ():
-    """
-    set os platform to set folder format
-    folder must with directory symbol '/' or '\\'
-    :return:    platform work directory
-    """
-    homeFolder = ''
-    folderSymbol = ''
-    # linux
-    if os.name == 'posix':
-        homeFolder = '/home/neod-anderjon/Pictures/Crawler/'
-        folderSymbol = '/'
-    # windows
-    elif os.name == 'nt':
-        homeFolder = 'E:\\Workstation_Files\\Pictures\\Comic\\IllustratorDesign\\Crawler\\'
-        folderSymbol = '\\'
-    else:
-        pass
-
-    return homeFolder, folderSymbol
-platform = setting_platform_workdir()
-work_dir = platform[0]
-symbol = platform[1]
-
-# real time clock
-rtc = time.localtime()
-ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
-
-# universal path
-logfile_name = symbol + 'CrawlerWork[%s].log' % ymd
-htmlfile_name = symbol + 'CrawlerWork[%s].html' % ymd
-ranking_folder = work_dir + 'RankTop_%s%s' % (ymd, symbol)
-# daily-rank path
-logfile_path = ranking_folder + logfile_name
-htmlfile_path = ranking_folder + htmlfile_name
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

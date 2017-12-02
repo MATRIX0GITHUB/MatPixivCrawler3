@@ -26,7 +26,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 0.4.0 LTE                                                                                                             #
+    #    Version: 0.5.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -85,14 +85,11 @@ class Matrix:
         :return:        proxy server, add to opener
         """
         req_ps_url = dataload.proxyServerRequestURL
-        psHeaders = {}
-        if os.name == 'posix':
-            psHeaders = {'User-Agent': dataload.userAgentLinux}
-        elif os.name == 'nt':
-            psHeaders = {'User-Agent': dataload.userAgentWindows}
+        psHeaders = dataload.ucUserAgent()
         request = urllib.request.Request(url=req_ps_url,
-                                  headers=psHeaders)
-        response = urllib.request.urlopen(request, timeout=30)
+                                        headers=psHeaders)
+        response = urllib.request.urlopen(request,
+                                          timeout=30)
         proxyRawwords = []
         if response.getcode() == dataload.reqSuccessCode:
             logContext = 'crawl proxy successed'
