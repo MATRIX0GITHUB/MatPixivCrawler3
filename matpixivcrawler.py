@@ -10,6 +10,7 @@ import rankingtop, illustrepo                                       # two mode t
 
 if __name__ == '__main__':
     print(privmatrix.Matrix().__doc__)
+
     mode = input(dataload.SHELLHEAD + 'select mode: ')
     if mode == 'rtn' or mode == '1':
         # create work class

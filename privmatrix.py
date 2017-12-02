@@ -26,7 +26,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 0.5.0 LTE                                                                                                             #
+    #    Version: 0.6.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -306,7 +306,7 @@ class Matrix:
         multi-process download all image
         test speed: daily-rank top 50 whole crawl elapsed time 1min
         :param urls:        all original images urls
-        :param base_pages:   all referer basic pages
+        :param base_pages:  all referer basic pages
         :param workdir:     work directory
         :param logpath:     log save path
         :return:            none
@@ -314,24 +314,26 @@ class Matrix:
         logContext = 'start to download target(s)======>'
         self.logprowork(logpath, logContext)
 
-        sub_thread = None
         lock = threading.Lock()                                     # object lock
+        queueLength = len(urls)
+        taskStack = []
         for i, img_url in enumerate(urls):
             # create overwrite threading.Thread object
             sub_thread = self.MultiThreading(lock, i, img_url, base_pages, workdir, logpath)
             sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
             sub_thread.start()                                      # start download
-            time.sleep(0.7)                                         # confirm thread has been created
+            time.sleep(0.1)                                         # confirm thread has been created, delay cannot too long
+            taskStack.append(sub_thread)
         # parent thread wait all sub-thread end
-        aliveThreadCnt = threading.active_count()
-        while aliveThreadCnt != 1:                                  # finally only parent process
-            time.sleep(3)
-            aliveThreadCnt = threading.active_count()               # update count
-            # display currently remaining process count
-            logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, len(urls))
-            self.logprowork(logpath, logContext)
-            sub_thread.join()                                       # block parent-thread
-
+        for task in taskStack:
+            aliveThreadCnt = threading.active_count()
+            while aliveThreadCnt != 1:                              # finally only parent process
+                aliveThreadCnt = threading.active_count()
+                # display currently remaining process count
+                logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
+                self.logprowork(logpath, logContext)
+                task.join()                                         # wait sub-threads
+                time.sleep(3)                                       # print delay
         logContext = 'all of threads reclaim, download finished=====>'
         self.logprowork(logpath, logContext)
 
