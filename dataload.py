@@ -11,7 +11,7 @@ __organization__    = '</MATRIX>'
 __version__         = 'v0p5_LTE'
 
 import urllib.request, urllib.parse, urllib.error
-import time, os, linecache, json
+import time, os, linecache
 import getpass
 
 # ======================get format time, and get year-month-date to be a folder name===============================
@@ -223,7 +223,7 @@ def build_login_headers(cookie):
         'X-Requested-With': xRequestwith,
     }
     # dict merge
-    buildHeaders = dict(json.loads(baseHeaders)).update(json.loads(ucUserAgent()))
+    buildHeaders = dict(baseHeaders, **ucUserAgent())               # longth-change argument
 
     return buildHeaders
 
@@ -243,7 +243,7 @@ def build_original_headers(referer):
         'Referer': referer,  # request basic page
     }
     # dict merge
-    buildHeaders = dict(json.loads(baseHeaders)).update(json.loads(ucUserAgent()))
+    buildHeaders = dict(baseHeaders, **ucUserAgent())               # longth-change argument
 
     return buildHeaders
 
