@@ -6,9 +6,9 @@
 
 import re
 import time
-import pllc, priv_lib
+import dataload, privmatrix
 
-pvmx = priv_lib.Matrix()
+pvmx = privmatrix.Matrix()
 
 class IllustratorRepos(object):
     """
@@ -35,28 +35,28 @@ class IllustratorRepos(object):
             :return:        request images count
         """
         # get illust artwork count mainpage url
-        cnt_url = pllc.mainPage + self.illustInputID
+        cnt_url = dataload.mainPage + self.illustInputID
         response = pvmx.opener.open(fullurl=cnt_url,
-                                    data=pllc.login_data[2],
+                                    data=dataload.login_data[2],
                                     timeout=300)
         web_src = response.read().decode("UTF-8", "ignore")
 
         # mate illustrator name
-        illustNamePattern = re.compile(pllc.illustNameRegex, re.S)
+        illustNamePattern = re.compile(dataload.illustNameRegex, re.S)
         arthor_name = re.findall(illustNamePattern, web_src)[0][10:-1]
 
         # mate max count
-        pattern = re.compile(pllc.illustAWCntRegex, re.S)
+        pattern = re.compile(dataload.illustAWCntRegex, re.S)
         maxCntword = re.findall(pattern, web_src)[1][5:-2]
         maxCnt = int(maxCntword)
 
         # input want image count
-        capCnt = int(input(pllc.SHELLHEAD
-                + 'enter you want to crawl image count(all repo have %d, each page at most 20 images): ' % maxCnt))
+        capCnt = int(input(dataload.SHELLHEAD
+                           + 'enter you want to crawl image count(all repo have %d, each page at most 20 images): ' % maxCnt))
         # count error
         while (capCnt > maxCnt) or (capCnt <= 0):
-            capCnt = int(input(pllc.SHELLHEAD
-                + 'error, input count must <= %d and not 0: ' % maxCnt))
+            capCnt = int(input(dataload.SHELLHEAD
+                               + 'error, input count must <= %d and not 0: ' % maxCnt))
         logContext = "check gather illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
         pvmx.logprowork(logpath, logContext)
 
@@ -74,17 +74,17 @@ class IllustratorRepos(object):
             :param logpath: log save path
             :return:        use regex to mate web src thumbnail images url
         """
-        step1url = pllc.mainPage + self.illustInputID + pllc.mainPagemiddle
+        step1url = dataload.mainPage + self.illustInputID + dataload.mainPagemiddle
         if array == 1:
             urlTarget = step1url
         elif array == 2:
-            urlTarget = step1url + pllc.mainPagetail + str(array)
+            urlTarget = step1url + dataload.mainPagetail + str(array)
         else:
-            urlTarget = step1url + pllc.mainPagetail + str(array)
+            urlTarget = step1url + dataload.mainPagetail + str(array)
         response = pvmx.opener.open(fullurl=urlTarget,
-                                    data=pllc.login_data[2],
+                                    data=dataload.login_data[2],
                                     timeout=300)
-        if response.getcode() == pllc.reqSuccessCode:
+        if response.getcode() == dataload.reqSuccessCode:
             logContext = "mainpage %d response successed" % array
         else:
             logContext = "mainpage %d response timeout, failed" % array
@@ -93,14 +93,14 @@ class IllustratorRepos(object):
         web_src = response.read().decode("UTF-8", "ignore")
 
         # mate artworks name
-        imageNamePattern = re.compile(pllc.imagesNameRegex, re.S)
+        imageNamePattern = re.compile(dataload.imagesNameRegex, re.S)
         imagesNameword = re.findall(imageNamePattern, web_src)
         imagesName = []
         for i in imagesNameword:
             imagesName.append(i[10:-1])
 
         # thumbnail image urls
-        pattern = re.compile(pllc.mainpageThumbnailRegex, re.S)
+        pattern = re.compile(dataload.mainpageThumbnailRegex, re.S)
         thumbnailImageurls = re.findall(pattern, web_src)
 
         logContext = "mainpage %d data gather finished" % array
@@ -131,7 +131,7 @@ class IllustratorRepos(object):
             allThumbnailimage += dataCapture[0]
             allArtworkName += dataCapture[1]
 
-        nbrPattern = re.compile(pllc.nbrRegex, re.S)                # cut artwork id list
+        nbrPattern = re.compile(dataload.nbrRegex, re.S)                # cut artwork id list
 
         artworkIDs = []                                             # images id list
         targetURL = []                                              # image original page url
@@ -139,10 +139,10 @@ class IllustratorRepos(object):
         for i in allThumbnailimage[:nbr]:
             vaildWord = i[50:-19]                                   # cut vaild words
             # init to png, then will change jpg
-            build_http = pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail
+            build_http = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail
             # build basic page use to request image
             img_id = re.findall(nbrPattern, vaildWord)[6]           # no.6 member is id
-            basePage = pllc.baseWebURL + img_id
+            basePage = dataload.baseWebURL + img_id
             artworkIDs.append(img_id)                               # image id list
             targetURL.append(build_http)                            # image url list
             basePages.append(basePage)                              # basic page list

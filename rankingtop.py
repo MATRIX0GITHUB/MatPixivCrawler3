@@ -6,9 +6,9 @@
 
 import re
 import time
-import pllc, priv_lib
+import dataload, privmatrix
 
-pvmx = priv_lib.Matrix()
+pvmx = privmatrix.Matrix()
 
 class DWMRankingTop(object):
     """
@@ -37,25 +37,25 @@ class DWMRankingTop(object):
         pvmx.mkworkdir(logpath, work_dir)
         # select ordinary top or r18 top
         # transfer ascii string to number
-        ormode = input(pllc.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
+        ormode = input(dataload.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
         imgCnt = ''
         # setting max count, base on request web src
         ordinaryMaxcnt = 50
         r18MaxCnt = 50
         if ormode == 'o' or ormode == '1':
             # input a string for request image number
-            imgCnt = int(input(pllc.SHELLHEAD + 'enter crawl rank top image count(max is %d): ' % ordinaryMaxcnt))
+            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank top image count(max is %d): ' % ordinaryMaxcnt))
             while imgCnt > ordinaryMaxcnt:
-                print(pllc.SHELLHEAD + 'input error, rank top at most %d' % ordinaryMaxcnt)
-                imgCnt = int(input(pllc.SHELLHEAD + 'enter again(max is %d): ' % ordinaryMaxcnt))
+                print(dataload.SHELLHEAD + 'input error, rank top at most %d' % ordinaryMaxcnt)
+                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % ordinaryMaxcnt))
         elif ormode == 'r' or ormode == '2':
             # input a string for request image number
-            imgCnt = int(input(pllc.SHELLHEAD + 'enter crawl rank R18 top image count(max is %d): ' % r18MaxCnt))
+            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank R18 top image count(max is %d): ' % r18MaxCnt))
             while imgCnt > r18MaxCnt:
-                print(pllc.SHELLHEAD + 'input error, rank R18 top at most %d' % r18MaxCnt)
-                imgCnt = int(input(pllc.SHELLHEAD + 'enter again(max is %d): ' % r18MaxCnt))
+                print(dataload.SHELLHEAD + 'input error, rank R18 top at most %d' % r18MaxCnt)
+                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % r18MaxCnt))
         else:
-            print(pllc.SHELLHEAD + "argv(s) error\n")
+            print(dataload.SHELLHEAD + "argv(s) error\n")
             ormode = None
 
         return imgCnt, ormode
@@ -74,37 +74,37 @@ class DWMRankingTop(object):
         rankWord = ''
         page_url = ''
         if ormode == 'o' or ormode == '1':
-            dwm = input(pllc.SHELLHEAD + 'select daily(1)/weekly(2)/monthly(3) rank top: ')
+            dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2)/monthly(3) rank top: ')
             if dwm == '1':
-                page_url = pllc.dailyRankURL
+                page_url = dataload.dailyRankURL
                 rankWord = 'daily'
             elif dwm == '2':
-                page_url = pllc.weeklyRankURL
+                page_url = dataload.weeklyRankURL
                 rankWord = 'weekly'
             elif dwm == '3':
-                page_url = pllc.monthlyRankURL
+                page_url = dataload.monthlyRankURL
                 rankWord = 'monthly'
             else:
-                print(pllc.SHELLHEAD + "argv(s) error\n")
+                print(dataload.SHELLHEAD + "argv(s) error\n")
             logContext = 'crawler set target to %s rank top %d image(s)' % (rankWord, img_nbr)
         elif ormode == 'r' or ormode == '2':
-            dwm = input(pllc.SHELLHEAD + 'select daily(1)/weekly(2) R18 rank top: ')
+            dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2) R18 rank top: ')
             if dwm == '1':
-                page_url = pllc.dailyRankURL_R18
+                page_url = dataload.dailyRankURL_R18
                 rankWord = 'daily'
             elif dwm == '2':
-                page_url = pllc.weeklyRankURL_R18
+                page_url = dataload.weeklyRankURL_R18
                 rankWord = 'weekly'
             else:
-                print(pllc.SHELLHEAD + "argv(s) error\n")
+                print(dataload.SHELLHEAD + "argv(s) error\n")
             logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
         else:
-            print(pllc.SHELLHEAD + "argv(s) error\n")
+            print(dataload.SHELLHEAD + "argv(s) error\n")
         pvmx.logprowork(self.logpath, logContext)
         response = pvmx.opener.open(fullurl=page_url,
-                                    data=pllc.login_data[2],
+                                    data=dataload.login_data[2],
                                     timeout=300)
-        if response.getcode() == pllc.reqSuccessCode:
+        if response.getcode() == dataload.reqSuccessCode:
             logContext = 'website response successed'
         else:
             # response failed, you need to check network status
@@ -113,15 +113,15 @@ class DWMRankingTop(object):
         web_src = response.read().decode("UTF-8", "ignore")
 
         # build original image url
-        vwPattern = re.compile(pllc.rankVWRegex, re.S)
+        vwPattern = re.compile(dataload.rankVWRegex, re.S)
         vwCapture = re.findall(vwPattern, web_src)
         targetURL = []
         for i in vwCapture[:img_nbr]:
             vaildWord = i[5:-1]                                     # pixiv may change its position sometimes
-            targetURL.append(pllc.imgOriginalheader + vaildWord + pllc.imgOriginaltail)
+            targetURL.append(dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail)
 
         # gather info of artworks
-        infoPattern = re.compile(pllc.rankTitleRegex, re.S)
+        infoPattern = re.compile(dataload.rankTitleRegex, re.S)
         dataCapture = re.findall(infoPattern, web_src)
 
         logContext = 'top ' + str(img_nbr) + ' info======>'
@@ -134,7 +134,7 @@ class DWMRankingTop(object):
             logContext = 'name: %s illustrator: %s id: %s url: %s' % (i[1], i[2], i[4], targetURL[k])
             pvmx.logprowork(self.logpath, logContext)
             aw_ids.append(i[4])
-            basePages.append(pllc.baseWebURL + i[4])                # every picture url address: base_url address + picture_id
+            basePages.append(dataload.baseWebURL + i[4])                # every picture url address: base_url address + picture_id
 
         return targetURL, basePages
 

@@ -11,28 +11,28 @@ import threading
 from PIL import Image
 from collections import OrderedDict
 from retrying import retry
-import pllc
+import dataload
 
 proxyHascreated = False                                             # global var init value
 
 class Matrix:
     """
-        #################################################################################################################
-        #    ██████╗ ██╗██╗  ██╗██╗██╗   ██╗       ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ ██████╗     #
-        #    ██╔══██╗██║╚██╗██╔╝██║██║   ██║      ██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗╚════██╗    #
-        #    ██████╔╝██║ ╚███╔╝ ██║██║   ██║█████╗██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝ █████╔╝    #
-        #    ██╔═══╝ ██║ ██╔██╗ ██║╚██╗ ██╔╝╚════╝██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗ ╚═══██╗    #
-        #    ██║     ██║██╔╝ ██╗██║ ╚████╔╝       ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║██████╔╝    #
-        #    ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝         ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝     #
-        #                                                                                                               #
-        #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                               #
-        #    Version: 0.1.0 LTE                                                                                         #
-        #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                   #
-        #    MatPixivCrawler Help Page                                                                                  #
-        #    1.rtn  ---     RankTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                              #
-        #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)                                   #
-        #    help   ---     print this help page                                                                        #
-        #################################################################################################################
+    #####################################################################################################################################
+    #    ███╗   ███╗ █████╗ ████████╗██████╗ ██╗██╗  ██╗██╗██╗   ██╗ ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ ██████╗   #
+    #    ████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗██║╚██╗██╔╝██║██║   ██║██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗╚════██╗  #
+    #    ██╔████╔██║███████║   ██║   ██████╔╝██║ ╚███╔╝ ██║██║   ██║██║     ██████╔╝███████║██║ █╗ ██║██║     █████╗  ██████╔╝ █████╔╝  #
+    #    ██║╚██╔╝██║██╔══██║   ██║   ██╔═══╝ ██║ ██╔██╗ ██║╚██╗ ██╔╝██║     ██╔══██╗██╔══██║██║███╗██║██║     ██╔══╝  ██╔══██╗ ╚═══██╗  #
+    #    ██║ ╚═╝ ██║██║  ██║   ██║   ██║     ██║██╔╝ ██╗██║ ╚████╔╝ ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║██████╔╝  #
+    #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
+    #                                                                                                                                   #
+    #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
+    #    Version: 0.3.0 LTE                                                                                                             #
+    #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
+    #    MatPixivCrawler Help Page                                                                                                      #
+    #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
+    #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)                                                       #
+    #    help   ---     print this help page                                                                                            #
+    #####################################################################################################################################
     """
     def __init__(self):
         # from first login save cookie and create global opener
@@ -51,8 +51,8 @@ class Matrix:
         """
         # this log file must be a new file
         logFile = open(logpath, 'a+', encoding='utf-8')             # add context to file option 'a+'
-        print(pllc.SHELLHEAD + savecontent)                         # with shell header
-        print(pllc.SHELLHEAD + savecontent, file=logFile)           # write to log
+        print(dataload.SHELLHEAD + savecontent)                         # with shell header
+        print(dataload.SHELLHEAD + savecontent, file=logFile)           # write to log
 
     def mkworkdir(self, logpath, folder):
         """
@@ -83,28 +83,28 @@ class Matrix:
             :param logpath: log save path
             :return:        proxy server, add to opener
         """
-        req_ps_url = pllc.proxyServerRequestURL
+        req_ps_url = dataload.proxyServerRequestURL
         psHeaders = {}
         if os.name == 'posix':
-            psHeaders = {'User-Agent': pllc.userAgentLinux}
+            psHeaders = {'User-Agent': dataload.userAgentLinux}
         elif os.name == 'nt':
-            psHeaders = {'User-Agent': pllc.userAgentWindows}
+            psHeaders = {'User-Agent': dataload.userAgentWindows}
         request = urllib.request.Request(url=req_ps_url,
                                   headers=psHeaders)
         response = urllib.request.urlopen(request, timeout=30)
         proxyRawwords = []
-        if response.getcode() == pllc.reqSuccessCode:
+        if response.getcode() == dataload.reqSuccessCode:
             logContext = 'crawl proxy successed'
             web_src = response.read().decode("UTF-8", "ignore")
             # use beautifulsoup lib mate 'tr' word
-            proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all(pllc.proxyServerRegex)
+            proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all(dataload.proxyServerRegex)
         else:
             logContext = 'crawl proxy failed, return code: %d' % response.getcode()
         self.logprowork(logpath, logContext)
         ip_list = []
         for i in range(1, len(proxyRawwords)):
             ip_info = proxyRawwords[i]
-            tds = ip_info.find_all(pllc.arrangeProxyServerRegex)
+            tds = ip_info.find_all(dataload.arrangeProxyServerRegex)
             # build a format: ip:port
             ip_list.append('http://' + tds[1].text + ':' + tds[2].text)
 
@@ -121,8 +121,8 @@ class Matrix:
             :return:    post way request data
         """
         # request a post key
-        response = self.opener.open(pllc.postKeyGeturl, timeout=40)
-        if response.getcode() == pllc.reqSuccessCode:
+        response = self.opener.open(dataload.postKeyGeturl, timeout=40)
+        if response.getcode() == dataload.reqSuccessCode:
             logContext = 'post-key response successed'
         else:
             logContext = 'post-key response failed, return code: %d' % response.getcode()
@@ -133,21 +133,21 @@ class Matrix:
             self.logprowork(logpath, logContext)
         # mate post key
         web_src = response.read().decode("UTF-8", "ignore")
-        postPattern = re.compile(pllc.postKeyRegex, re.S)
+        postPattern = re.compile(dataload.postKeyRegex, re.S)
         postKey = re.findall(postPattern, web_src)[0]
         logContext = 'get post-key: ' + postKey
         self.logprowork(logpath, logContext)
 
         # build basic dict
         postTabledict = OrderedDict()                               # this post data must has a order
-        postTabledict['pixiv_id'] = pllc.login_data[0]
-        postTabledict['password'] = pllc.login_data[1]
+        postTabledict['pixiv_id'] = dataload.login_data[0]
+        postTabledict['password'] = dataload.login_data[1]
         postTabledict['captcha'] = ""
         postTabledict['g_recaptcha_response'] = ""
         postTabledict['post_key'] = postKey
         postTabledict['source'] = "pc"
-        postTabledict['ref'] = pllc.login_ref
-        postTabledict['return_to'] = pllc.hostWebURL
+        postTabledict['ref'] = dataload.login_ref
+        postTabledict['return_to'] = dataload.hostWebURL
         # transfer to json data format
         post_data = urllib.parse.urlencode(postTabledict).encode("UTF-8")
 
@@ -161,18 +161,18 @@ class Matrix:
         """
         # login init need to commit post data to Pixiv
         postData = self.gatherpostkey(logpath)                      # get post-key and build post-data
-        response = self.opener.open(fullurl=pllc.originHost,
+        response = self.opener.open(fullurl=dataload.originHost,
                                     data=postData,
                                     timeout=40)
         # try to test website response
-        if response.getcode() == pllc.reqSuccessCode:
+        if response.getcode() == dataload.reqSuccessCode:
             logContext = 'login response successed'
         else:
             logContext = 'login response fatal, return code %d' % response.getcode()
         self.logprowork(logpath, logContext)
 
     def save_test_html(self, workdir, content, logpath):
-        htmlfile = open(workdir + pllc.symbol + 'test.html', "wb")
+        htmlfile = open(workdir + dataload.symbol + 'test.html', "wb")
         htmlfile.write(content)
         htmlfile.close()
         logContext = 'save request html page ok'
@@ -204,8 +204,8 @@ class Matrix:
             proxy_handler = urllib.request.ProxyHandler(proxy)
 
         # setting headers
-        headers = pllc.build_original_headers(basepages[index])
-        list_headers = pllc.dict_transto_list(headers)
+        headers = dataload.build_original_headers(basepages[index])
+        list_headers = dataload.dict_transto_list(headers)
         self.opener.addheaders = list_headers
         urllib.request.install_opener(self.opener)                  # must install new
         response = None
@@ -220,7 +220,7 @@ class Matrix:
             ## self.logprowork(logpath, logContext)
 
             # http error 404, change image type
-            if e.code == pllc.reqNotFound:
+            if e.code == dataload.reqNotFound:
                 imgDatatype = 'jpg'                                 # change data type
                 changeToJPGurl = url[0:-3] + imgDatatype
                 try:
@@ -232,7 +232,7 @@ class Matrix:
                     ## self.logprowork(logpath, logContext)
 
                     # not 404 change proxy
-                    if e.code != pllc.reqNotFound:
+                    if e.code != dataload.reqNotFound:
                         # if timeout, use proxy reset request
                         logContext = "change proxy server"
                         self.logprowork(logpath, logContext)
@@ -249,13 +249,13 @@ class Matrix:
                 response = self.opener.open(fullurl=url,
                                             timeout=timeout)
 
-        if response.getcode() == pllc.reqSuccessCode:
+        if response.getcode() == dataload.reqSuccessCode:
             # save response data to image format
             imgBindata = response.read()
             logContext = 'capture target no.%d image ok' % (index + 1)
             self.logprowork(logpath, logContext)
             # this step will delay much time
-            with open(savepath + pllc.symbol + image_name + '.' + imgDatatype, 'wb') as jpg:
+            with open(savepath + dataload.symbol + image_name + '.' + imgDatatype, 'wb') as jpg:
                 jpg.write(imgBindata)
             logContext = 'download no.%d image finished' % (index + 1)
             self.logprowork(logpath, logContext)
@@ -353,7 +353,7 @@ class Matrix:
                             "this.height = this.attributes['oriHeight'].value;}}}};</script>")
         for i in os.listdir(workdir):
             if i[-4:len(i)] in [".png", ".jpg", ".bmp"]:            # support image format
-                width, height = Image.open(workdir + pllc.symbol + i).size
+                width, height = Image.open(workdir + dataload.symbol + i).size
                 i = i.replace("#", "%23")
                 ## htmlFile.writelines("<a href = \"%s\">"%("./" + filename))
                 # set image source line
@@ -377,12 +377,12 @@ class Matrix:
         ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
         logContext = "crawler work finished, log time: " + ymdhms
         self.logprowork(logpath, logContext)
-        logContext =                                                    \
-            pllc.__laboratory__ + ' ' + pllc.__organization__           \
+        logContext = \
+            dataload.__laboratory__ + ' ' + dataload.__organization__ \
             + ' technology support\n'                                   \
-            'Code by ' + pllc.__organization__ + '@' + pllc.__author__
+            'Code by ' + dataload.__organization__ + '@' + dataload.__author__
         self.logprowork(logpath, logContext)
-        os.system(pllc.platform_filemanager() + ' ' + pllc.work_dir) # open file-manager to check result
+        os.system(dataload.platform_filemanager() + ' ' + dataload.work_dir) # open file-manager to check result
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
