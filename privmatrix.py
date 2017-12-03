@@ -317,23 +317,26 @@ class Matrix:
         lock = threading.Lock()                                     # object lock
         queueLength = len(urls)
         taskStack = []
+        aliveThreadCnt = None
         for i, img_url in enumerate(urls):
             # create overwrite threading.Thread object
             sub_thread = self.MultiThreading(lock, i, img_url, base_pages, workdir, logpath)
             sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
+            time.sleep(0.1)                                         # delay
             sub_thread.start()                                      # start download
             time.sleep(0.1)                                         # confirm thread has been created, delay cannot too long
-            taskStack.append(sub_thread)
+            taskStack.append(sub_thread)                            # task into stack
         # parent thread wait all sub-thread end
         for task in taskStack:
-            aliveThreadCnt = threading.active_count()
             while aliveThreadCnt != 1:                              # finally only parent process
                 aliveThreadCnt = threading.active_count()
                 # display currently remaining process count
                 logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
                 self.logprowork(logpath, logContext)
+                time.sleep(3)
+
                 task.join()                                         # wait sub-threads
-                time.sleep(3)                                       # print delay
+
         logContext = 'all of threads reclaim, download finished=====>'
         self.logprowork(logpath, logContext)
 

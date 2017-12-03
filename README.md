@@ -23,7 +23,7 @@ Update
 ======
 
     Version: v0p6_LTE
-    Last Update Time: 20171203am0139
+    Last Update Time: 20171203pm1455
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 
@@ -96,3 +96,6 @@ Problems that may arise
     no headers can be successfully logged in
     Now you can use this crawler to crawl all target from Pixiv
     
+    Perhaps finally a few remaining images(threads) can not be terminated, 
+    which is caused by the server blocking high-volume concurrent threads at the same time, 
+    this time can only give up these tasks to take the initiative to end the program
