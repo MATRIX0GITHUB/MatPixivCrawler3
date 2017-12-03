@@ -392,7 +392,7 @@ class Matrix:
             + ' technology support\n'                                   \
             'Code by ' + dataload.__organization__ + '@' + dataload.__author__
         self.logprowork(logpath, logContext)
-        os.system(dataload.platform_filemanager() + ' ' + dataload.work_dir) # open file-manager to check result
+        os.system(dataload.filemanager + ' ' + dataload.work_dir)   # open file-manager to check result
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

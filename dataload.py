@@ -19,21 +19,7 @@ import getpass
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
-def platform_filemanager():
-    """
-    define os gui file manager
-    :return:    file manager name
-    """
-    fm = ''
-    if os.name == 'posix':
-        fm = 'nautilus'
-    elif os.name == 'nt':
-        fm = 'explorer'
-    else:
-        pass
-    return fm
-
-def setting_platform_workdir ():
+def platform_setting ():
     """
     set os platform to set folder format
     folder must with directory symbol '/' or '\\'
@@ -41,21 +27,26 @@ def setting_platform_workdir ():
     """
     homeFolder = ''
     folderSymbol = ''
+    fileManager = ''
     # linux
     if os.name == 'posix':
         homeFolder = '/home/neod-anderjon/Pictures/Crawler/'
         folderSymbol = '/'
+        fileManager = 'nautilus'
     # windows
     elif os.name == 'nt':
-        homeFolder = 'E:\\Workstation_Files\\Pictures\\Comic\\IllustratorDesign\\Crawler\\'
+        homeFolder = 'E:\\Workstation_Files\\PictureDatabase\\Crawler\\'
         folderSymbol = '\\'
+        fileManager = 'explorer'
     else:
         pass
 
-    return homeFolder, folderSymbol
-platform = setting_platform_workdir()
+    return homeFolder, folderSymbol, fileManager
+
+platform = platform_setting()
 work_dir = platform[0]
 symbol = platform[1]
+filemanager = platform[2]
 
 # real time clock
 rtc = time.localtime()
