@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p6_LTE'
+__version__         = 'v0p7_LTE'
 
 import urllib.request, urllib.parse, urllib.error
 import time, os, linecache
@@ -19,7 +19,7 @@ import getpass
 
 SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
-def platform_setting ():
+def platform_setting():
     """
     set os platform to set folder format
     folder must with directory symbol '/' or '\\'

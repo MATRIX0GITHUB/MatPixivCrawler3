@@ -5,12 +5,12 @@
 # this python script is built to create a private library use in this crawler
 
 import urllib.request, urllib.parse, urllib.error, http.cookiejar
-import time, random, re, os
 from bs4 import BeautifulSoup
+from retrying import retry
 import threading
 from PIL import Image
 from collections import OrderedDict
-from retrying import retry
+import time, random, re, os
 import dataload
 
 proxyHascreated = False                                             # global var init value
@@ -26,7 +26,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 0.6.0 LTE                                                                                                             #
+    #    Version: 0.7.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -119,7 +119,7 @@ class Matrix:
         :return:    post way request data
         """
         # request a post key
-        response = self.opener.open(dataload.postKeyGeturl, timeout=40)
+        response = self.opener.open(dataload.postKeyGeturl, timeout=30)
         if response.getcode() == dataload.reqSuccessCode:
             logContext = 'post-key response successed'
         else:
@@ -162,7 +162,7 @@ class Matrix:
         response = self.opener.open(fullurl=dataload.originHost,
                                     data=postData,
                                     timeout=40)
-        # try to test website response
+        # first must login to website then can request page
         if response.getcode() == dataload.reqSuccessCode:
             logContext = 'login response successed'
         else:
@@ -204,7 +204,7 @@ class Matrix:
         proxy_handler = None
         global proxyHascreated
         if proxyHascreated is False:
-            proxyHascreated = True
+            proxyHascreated = True                                  # no reset
             proxy = self.getproxyserver(logpath)
             proxy_handler = urllib.request.ProxyHandler(proxy)
 
@@ -220,7 +220,6 @@ class Matrix:
                                         timeout=timeout)
         # timeout or image data type error
         except urllib.error.HTTPError as e:
-            # this error display can release
             ## logContext = str(e.code)
             ## self.logprowork(logpath, logContext)
 
@@ -232,11 +231,10 @@ class Matrix:
                     response = self.opener.open(fullurl=changeToJPGurl,
                                                 timeout=timeout)
                 except urllib.error.HTTPError as e:
-                    # this error display can release
                     ## logContext = str(e.code)
                     ## self.logprowork(logpath, logContext)
 
-                    # not 404 change proxy
+                    # not 404 change proxy, cause request server forbidden crawler
                     if e.code != dataload.reqNotFound:
                         # if timeout, use proxy reset request
                         logContext = "change proxy server"
@@ -253,15 +251,15 @@ class Matrix:
                 self.opener = urllib.request.build_opener(proxy_handler) # add proxy handler
                 response = self.opener.open(fullurl=url,
                                             timeout=timeout)
-
+        # save request bin data file
         if response.getcode() == dataload.reqSuccessCode:
             # save response data to image format
             imgBindata = response.read()
             logContext = 'capture target no.%d image ok' % (index + 1)
             self.logprowork(logpath, logContext)
             # this step will delay much time
-            with open(savepath + dataload.symbol + image_name + '.' + imgDatatype, 'wb') as jpg:
-                jpg.write(imgBindata)
+            with open(savepath + dataload.symbol + image_name + '.' + imgDatatype, 'wb') as img:
+                img.write(imgBindata)
             logContext = 'download no.%d image finished' % (index + 1)
             self.logprowork(logpath, logContext)
 
@@ -316,27 +314,21 @@ class Matrix:
 
         lock = threading.Lock()                                     # object lock
         queueLength = len(urls)
-        taskStack = []
-        aliveThreadCnt = None
+        sub_thread = None
+        aliveThreadCnt = queueLength
         for i, img_url in enumerate(urls):
             # create overwrite threading.Thread object
             sub_thread = self.MultiThreading(lock, i, img_url, base_pages, workdir, logpath)
             sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
-            time.sleep(0.1)                                         # delay
             sub_thread.start()                                      # start download
-            time.sleep(0.1)                                         # confirm thread has been created, delay cannot too long
-            taskStack.append(sub_thread)                            # task into stack
+            time.sleep(0.2)                                         # confirm thread has been created, delay cannot too long
         # parent thread wait all sub-thread end
-        for task in taskStack:
-            while aliveThreadCnt != 1:                              # finally only parent process
-                aliveThreadCnt = threading.active_count()
-                # display currently remaining process count
-                logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
-                self.logprowork(logpath, logContext)
-                time.sleep(3)
-
-                task.join()                                         # wait sub-threads
-
+        while aliveThreadCnt > 1:                                   # finally only parent process
+            sub_thread.join()                                       # parent thread wait sub-threads over
+            time.sleep(3)
+            aliveThreadCnt = threading.active_count()
+            logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
+            self.logprowork(logpath, logContext)
         logContext = 'all of threads reclaim, download finished=====>'
         self.logprowork(logpath, logContext)
 
@@ -374,7 +366,7 @@ class Matrix:
         # end of htmlfile
         htmlFile.writelines("</body>\r\n</html>")
         htmlFile.close()
-        logContext = 'image browse html product finished'
+        logContext = 'image browse html generate finished'
         self.logprowork(logpath, logContext)
 
     def work_finished(self, logpath):
