@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p7_LTE'
+__version__         = 'v0p8_LTE'
 
 import urllib.request, urllib.parse, urllib.error
 import time, os, linecache
@@ -124,7 +124,7 @@ originHost = "https://accounts.pixiv.net/api/login?lang=en"         # login requ
 originHost2 = "https://accounts.pixiv.net"                          # login origin
 # request universal original image constant words
 imgOriginalheader = 'https://i.pximg.net/img-original/img'          # original image https url header
-imgOriginaltail = '_p0.png'                                         # original image https url tail, default set to png
+imgOriginaltail = lambda num:'_p%d.png' % num                       # original image https url tail, default set to png
 # page request http proxy
 proxyServerRequestURL = 'http://www.xicidaili.com/nn/'              # proxy server get website
 ucRankURL = 'http://www.pixiv.net/ranking.php?mode='                # rank top universal word header
@@ -139,6 +139,7 @@ illustHomeURL = 'http://www.pixiv.net/member.php?id='               # illust hom
 mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust main page
 mainPagemiddle = '&type=all'                                        # url middle word
 mainPagetail = '&p='                                                # url tail word
+judgeWord = '_p0_master1200.jpg'                                    # judge gif or jpg/png
 
 # ==================================http request headers include data============================================
 # request use data, from browser javascript or fiddler
@@ -246,12 +247,14 @@ rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user
 rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
 nbrRegex = '\d+\.?\d*'                                              # mate any number
 imgThumbnailRegex = '<img src="(.*?)"'                              # mate thumbnail image
-mainpageThumbnailRegex = '-src=".*?"'                               # mainpage use thumbnail regex
+imgWholeInfoRegex = 'image-item">.*?</li>'                          # catch <li class="image-item">...</li>
+datasrcRegex = 'data-src=".*?"'
 illustNameRegex = 'me"title=".*?"'                                  # mate illust name
 imagesNameRegex = 'e" title=".*?"'                                  # mate mainpage images name
 proxyServerRegex = 'tr'                                             # use beautifulsoup module, easy
 arrangeProxyServerRegex = 'td'                                      # cut gather list
 illustAWCntRegex = 'dge">.*?<'                                      # illust artwork count mate
+imgSpancnt = '<span>.*?</span>'                                     # gather one span image count
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

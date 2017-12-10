@@ -50,17 +50,7 @@ class IllustratorRepos(object):
         maxCntword = re.findall(pattern, web_src)[1][5:-2]
         maxCnt = int(maxCntword)
 
-        # input want image count
-        capCnt = int(input(dataload.SHELLHEAD
-                           + 'gather whole repo %d images, enter you want to crawl image count: ' % maxCnt))
-        # count error
-        while (capCnt > maxCnt) or (capCnt <= 0):
-            capCnt = int(input(dataload.SHELLHEAD
-                               + 'error, input count must <= %d and not 0: ' % maxCnt))
-        logContext = "check crawl illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
-        pvmx.logprowork(logpath, logContext)
-
-        return capCnt, arthor_name
+        return maxCnt, arthor_name
 
     def crawl_onepage_data(self, array, logpath):
         """
@@ -92,21 +82,46 @@ class IllustratorRepos(object):
         # each page cut thumbnail image url
         web_src = response.read().decode("UTF-8", "ignore")
 
-        # mate artworks name
+        # build need regex
+        imgWholeInfoPattern = re.compile(dataload.imgWholeInfoRegex, re.S)
+        datasrcPattern = re.compile(dataload.datasrcRegex, re.S)
         imageNamePattern = re.compile(dataload.imagesNameRegex, re.S)
-        imagesNameword = re.findall(imageNamePattern, web_src)
-        imagesName = []
-        for i in imagesNameword:
-            imagesName.append(i[10:-1])
+        spanPattern = re.compile(dataload.imgSpancnt, re.S)
 
-        # thumbnail image urls
-        pattern = re.compile(dataload.mainpageThumbnailRegex, re.S)
-        thumbnailImageurls = re.findall(pattern, web_src)
+        imgWholeInfo = re.findall(imgWholeInfoPattern, web_src)     # <li class="image-item"> whole word
+        imagesName = []
+        targetUrls = []
+        # image have 3 format: jpg/png/gif
+        # this crawler will give gif format up and crawl png or jpg
+        # pixiv one repo maybe have multi-images
+        for item in imgWholeInfo:
+            thumbnail = re.findall(datasrcPattern, item)[0]         # mate thumbnail image
+            judgeWord = thumbnail[-19:-1]
+            # check jpg/png or gif
+            if judgeWord == dataload.judgeWord:
+                span_nbr = re.findall(spanPattern, item)
+                # catch vaild word from thumbnail url
+                vaildWord = thumbnail[54:-19]                       # cut vaild words
+                # try to check multi-span images
+                if len(span_nbr) != 0:                              # non-empty list
+                    for p in range(int(span_nbr[0][6:-7])):
+                        # mate image name
+                        imageName = re.findall(imageNamePattern, item)[0][10:-1]
+                        imagesName.append(imageName)
+                        target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(p)
+                        targetUrls.append(target_url)
+                else:
+                    imageName = re.findall(imageNamePattern, item)[0][10:-1]
+                    imagesName.append(imageName)
+                    target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(0)
+                    targetUrls.append(target_url)
+            else:                                                   # give up gif format
+                pass
 
         logContext = "mainpage %d data gather finished" % array
         pvmx.logprowork(logpath, logContext)
 
-        return thumbnailImageurls, imagesName
+        return targetUrls, imagesName
 
     def crawl_allpage_target(self, nbr, arthor_name, logpath):
         """
@@ -124,38 +139,43 @@ class IllustratorRepos(object):
             needPagecnt = int(nbr / 20) + 1                         # calcus need request count
 
         # gather all data(thumbnail images and names)
-        allThumbnailimage = []
+        allTargeturls = []
         allArtworkName = []
         for i in range(needPagecnt):
             dataCapture = self.crawl_onepage_data(i + 1, logpath)
-            allThumbnailimage += dataCapture[0]
+            allTargeturls += dataCapture[0]
             allArtworkName += dataCapture[1]
+        # collection target count
+        aliveTargetcnt = len(allTargeturls)
 
-        nbrPattern = re.compile(dataload.nbrRegex, re.S)                # cut artwork id list
+        # input want image count
+        capCnt = int(input(dataload.SHELLHEAD
+                + 'gather all repo %d, whole target(s): %d, enter you want count: ' % (nbr, aliveTargetcnt)))
+        # count error
+        while (capCnt > aliveTargetcnt) or (capCnt <= 0):
+            capCnt = int(input(dataload.SHELLHEAD
+                + 'error, input count must <= %d and not 0: ' % aliveTargetcnt))
+        logContext = "check crawl illustrator id:" + self.illustInputID + " image(s):%d" % capCnt
+        pvmx.logprowork(logpath, logContext)
 
         artworkIDs = []                                             # images id list
-        targetURL = []                                              # image original page url
+        capTargets = []
         basePages = []                                              # image basic page
-        for i in allThumbnailimage[:nbr]:
-            vaildWord = i[50:-19]                                   # cut vaild words
-            # init to png, then will change jpg
-            build_http = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail
-            # build basic page use to request image
-            img_id = re.findall(nbrPattern, vaildWord)[6]           # no.6 member is id
+        for i in allTargeturls[:capCnt]:
+            capTargets.append(i)                                    # cut need count
+            img_id = i[57:-7]
             basePage = dataload.baseWebURL + img_id
             artworkIDs.append(img_id)                               # image id list
-            targetURL.append(build_http)                            # image url list
             basePages.append(basePage)                              # basic page list
-
         # log images info
         logContext = 'illustrator: ' + arthor_name + ' id: ' + self.illustInputID + ' artworks info====>'
         pvmx.logprowork(logpath, logContext)
 
-        for k, i in enumerate(allArtworkName[:nbr]):
-            logContext = 'no.%d image: %s id: %s url: %s' % ((k + 1), i, artworkIDs[k], targetURL[k])
+        for k, i in enumerate(allArtworkName[:capCnt]):
+            logContext = 'no.%d image: [%s id: %s url: %s]' % ((k + 1), i, artworkIDs[k], capTargets[k])
             pvmx.logprowork(logpath, logContext)
 
-        return targetURL, basePages
+        return capTargets, basePages
 
     def start(self):
         """

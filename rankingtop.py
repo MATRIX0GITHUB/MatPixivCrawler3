@@ -119,7 +119,7 @@ class DWMRankingTop(object):
         for i in vwCapture[:img_nbr]:
             vaildWord = i[5:-1]                                     # pixiv may change its position sometimes
             # build original image url format
-            targetURL.append(dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail)
+            targetURL.append(dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(0))
 
         # gather info of artworks
         infoPattern = re.compile(dataload.rankTitleRegex, re.S)
