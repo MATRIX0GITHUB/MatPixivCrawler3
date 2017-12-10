@@ -90,7 +90,3 @@ Problems that may arise
     as long as the opener is guaranteed to be used correctly, 
     no headers can be successfully logged in
     Now you can use this crawler to crawl all target from Pixiv
-    
-    Perhaps finally a few remaining images(threads) can not be terminated, 
-    which is caused by the server blocking high-volume concurrent threads at the same time, 
-    this time can only give up these tasks to take the initiative to end the program
