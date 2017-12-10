@@ -23,17 +23,16 @@ Update
 ======
 
     Version: v0p9_LTE
-    Last Update Time: 20171211am0144
+    Last Update Time: 20171211am0149
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 
-    Call threading to add multi-process download images
-    Two mode for requesting original images
+    Call threading to add multi-thread download images
 
 Platform
 ======
 
-    Linux x86_64 kernel and Windows NT
+    Linux x86_64 and Windows NT(tested in Ubuntu 16.04 and Windows 10)
     Python: 3.x(not support 2.x)
 
 ## Requirements
