@@ -26,7 +26,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 0.8.0 LTE                                                                                                             #
+    #    Version: 0.9.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -94,15 +94,14 @@ class Matrix:
         if response.getcode() == dataload.reqSuccessCode:
             logContext = 'crawl proxy successed'
             web_src = response.read().decode("UTF-8", "ignore")
-            # use beautifulsoup lib mate 'tr' word
-            proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all(dataload.proxyServerRegex)
+            proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all('tr') # mate tr tag class
         else:
             logContext = 'crawl proxy failed, return code: %d' % response.getcode()
         self.logprowork(logpath, logContext)
         ip_list = []
         for i in range(1, len(proxyRawwords)):
             ip_info = proxyRawwords[i]
-            tds = ip_info.find_all(dataload.arrangeProxyServerRegex)
+            tds = ip_info.find_all('td')                            # mate td tag class
             # build a format: ip:port
             ip_list.append('http://' + tds[1].text + ':' + tds[2].text)
 
@@ -182,6 +181,52 @@ class Matrix:
         htmlfile.close()
         logContext = 'save request html page ok'
         self.logprowork(logpath, logContext)
+
+    @staticmethod
+    def data_sizer(wholePattern, infoPattern, web_src):
+        """
+        a sizer for all of imags in a pages
+        :param wholePattern:    whole info data regex compile pattern
+        :param infoPattern:     image info regex compile pattern
+        :param web_src:         webpage source
+        :return:                original target urls, image infos
+        """
+        infos = []
+        targetUrls = []
+        datasrcPattern = re.compile(dataload.datasrcRegex, re.S)
+        spanPattern = re.compile(dataload.imgSpancnt, re.S)
+        imgWholeInfo = re.findall(wholePattern, web_src)
+        # image have 3 format: jpg/png/gif
+        # this crawler will give gif format up and crawl png or jpg
+        # pixiv one repo maybe have multi-images
+        for item in imgWholeInfo:
+            thumbnail = re.findall(datasrcPattern, item)[0]  # mate thumbnail image
+            judgeWord = thumbnail[-18:]  # _p0_master1200.jpg
+            # check jpg/png or gif
+            if judgeWord == dataload.judgeWord:
+                span_nbr = re.findall(spanPattern, item)
+                # catch vaild word from thumbnail url
+                vaildWord = thumbnail[44:-18]  # cut vaild words
+                # try to check multi-span images
+                if len(span_nbr) != 0:  # non-empty list
+                    for p in range(int(span_nbr[0])):
+                        # gather image info
+                        info = re.findall(infoPattern, item)[0]
+                        infos.append(info)
+                        # build original image url
+                        target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(p)
+                        targetUrls.append(target_url)
+                else:
+                    # gather image info
+                    info = re.findall(infoPattern, item)[0]
+                    infos.append(info)
+                    # build original image url
+                    target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(0)
+                    targetUrls.append(target_url)
+            else:  # give up gif format
+                pass
+
+        return targetUrls, infos
 
     @retry
     def save_oneimage(self, index, url, basepages, savepath, logpath):
@@ -343,7 +388,7 @@ class Matrix:
         """
         htmlFile = open(htmlpath, "w")                              # write html file
         # build html background page text
-        htmlFile.writelines("<html>\r\n<head>\r\n<title>pixiv-crawler(MatPixivCrawler) ResultPage</title>\r\n</head>\r\n<body>\r\n")
+        htmlFile.writelines("<html>\r\n<head>\r\n<title>MatPixivCrawler3 ResultPage</title>\r\n</head>\r\n<body>\r\n")
         htmlFile.writelines("<script>window.onload = function(){"
                             "var imgs = document.getElementsByTagName('img');"
                             "for(var i = 0; i < imgs.length; i++){"

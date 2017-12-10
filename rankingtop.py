@@ -26,46 +26,36 @@ class DWMRankingTop(object):
         self.htmlpath = htmlpath
 
     @staticmethod
-    def gather_essential_info(work_dir, logpath):
+    def gather_essential_info(ormode, whole_nbr):
         """
         get input image count
-        :param work_dir:    work directory
-        :param logpath:     log save path
+        :param ormode:      select ranktop ordinary or r18 mode
+        :param whole_nbr:   whole ranking crawl count
         :return:            crawl images count
         """
-        # first create folder
-        pvmx.mkworkdir(logpath, work_dir)
-        # select ordinary top or r18 top
         # transfer ascii string to number
-        ormode = input(dataload.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
         imgCnt = ''
-        # setting max count, base on request web src
-        ordinaryMaxcnt = 50
-        r18MaxCnt = 50
         if ormode == 'o' or ormode == '1':
             # input a string for request image number
-            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank top image count(max is %d): ' % ordinaryMaxcnt))
-            while imgCnt > ordinaryMaxcnt:
-                print(dataload.SHELLHEAD + 'input error, rank top at most %d' % ordinaryMaxcnt)
-                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % ordinaryMaxcnt))
+            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank top image count(max is %d): ' % whole_nbr))
+            while imgCnt > whole_nbr:
+                print(dataload.SHELLHEAD + 'input error, rank top at most %d' % whole_nbr)
+                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % whole_nbr))
         elif ormode == 'r' or ormode == '2':
             # input a string for request image number
-            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank R18 top image count(max is %d): ' % r18MaxCnt))
-            while imgCnt > r18MaxCnt:
-                print(dataload.SHELLHEAD + 'input error, rank R18 top at most %d' % r18MaxCnt)
-                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % r18MaxCnt))
+            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank R18 top image count(max is %d): ' % whole_nbr))
+            while imgCnt > whole_nbr:
+                print(dataload.SHELLHEAD + 'input error, rank R18 top at most %d' % whole_nbr)
+                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % whole_nbr))
         else:
-            print(dataload.SHELLHEAD + "argv(s) error\n")
-            ormode = None
+            pass
 
-        return imgCnt, ormode
+        return imgCnt
 
-    def gather_rankingdata(self, ormode, img_nbr):
+    def gather_rankingdata(self):
         """
         crawl dailyRank list
         :param self:    self class
-        :param ormode:  oridinary mode or R18 mode
-        :param img_nbr: images request count
         :return:        original images urls list
         """
         logContext = 'gather rank list======>'
@@ -73,6 +63,7 @@ class DWMRankingTop(object):
 
         rankWord = ''
         page_url = ''
+        ormode = input(dataload.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
         if ormode == 'o' or ormode == '1':
             dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2)/monthly(3) rank top: ')
             if dwm == '1':
@@ -86,7 +77,7 @@ class DWMRankingTop(object):
                 rankWord = 'monthly'
             else:
                 print(dataload.SHELLHEAD + "argv(s) error\n")
-            logContext = 'crawler set target to %s rank top %d image(s)' % (rankWord, img_nbr)
+            logContext = 'crawler set target to %s rank top' % rankWord
         elif ormode == 'r' or ormode == '2':
             dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2) R18 rank top: ')
             if dwm == '1':
@@ -97,7 +88,7 @@ class DWMRankingTop(object):
                 rankWord = 'weekly'
             else:
                 print(dataload.SHELLHEAD + "argv(s) error\n")
-            logContext = 'crawler set target to %s r18 rank top %d image(s)' % (rankWord, img_nbr)
+            logContext = 'crawler set target to %s r18 rank top' % rankWord
         else:
             print(dataload.SHELLHEAD + "argv(s) error\n")
         pvmx.logprowork(self.logpath, logContext)
@@ -112,41 +103,37 @@ class DWMRankingTop(object):
         pvmx.logprowork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
 
-        # build original image url
-        vwPattern = re.compile(dataload.rankVWRegex, re.S)
-        vwCapture = re.findall(vwPattern, web_src)
-        targetURL = []
-        for i in vwCapture[:img_nbr]:
-            vaildWord = i[5:-1]                                     # pixiv may change its position sometimes
-            # build original image url format
-            targetURL.append(dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(0))
-
-        # gather info of artworks
+        # size info in webpage source
+        imgRankInfoPattern = re.compile(dataload.rankSectionRegex, re.S)
         infoPattern = re.compile(dataload.rankTitleRegex, re.S)
-        dataCapture = re.findall(infoPattern, web_src)
+        sizerResult = pvmx.data_sizer(imgRankInfoPattern, infoPattern, web_src)
+        targetURLs = sizerResult[0]
+        imgInfos = sizerResult[1]
 
+        aliveTargets = len(targetURLs)
+        img_nbr = self.gather_essential_info(ormode, aliveTargets)
         logContext = 'gather rankingtop ' + str(img_nbr) + ' info======>'
         pvmx.logprowork(self.logpath, logContext)
         basePages = []                                              # request original image need referer
-        for k, i in enumerate(dataCapture[:img_nbr]):
+        for k, i in enumerate(imgInfos[:img_nbr]):
             # rank-array    image-name  arthur-name     arthur-id   original-image-url
-            logContext = '%s name: %s illustrator: %s id: %s url: %s' % (i[0], i[1], i[2], i[4], targetURL[k])
+            logContext = 'no.%d image: [%s name: %s illustrator: %s id: %s url: %s]' \
+                         % (k + 1, i[0], i[1], i[2], i[4], targetURLs[k])
             pvmx.logprowork(self.logpath, logContext)
             basePages.append(dataload.baseWebURL + i[4])            # every picture url address: base_url address + picture_id
 
-        return targetURL, basePages
+        return targetURLs, basePages
 
     def start(self):
         """
         class main call process
         :return:    none
         """
-        info = self.gather_essential_info(self.workdir, self.logpath)
-
+        pvmx.mkworkdir(self.logpath, self.workdir)
         starttime = time.time()
 
         pvmx.camouflage_login(self.logpath)                         # login website, key step
-        datas = self.gather_rankingdata(info[1], info[0])           # gather data
+        datas = self.gather_rankingdata()                           # gather data
         # download images
         pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
 

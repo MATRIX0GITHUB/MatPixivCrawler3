@@ -27,7 +27,7 @@ class IllustratorRepos(object):
         self.logpath = self.workdir + logname
         self.htmlpath = self.workdir + htmlname
 
-    def gather_preloadinfo(self, logpath):
+    def gather_preloadinfo(self):
         """
         crawler need to know how many images do you want
         :param self:    self class
@@ -43,11 +43,11 @@ class IllustratorRepos(object):
 
         # mate illustrator name
         illustNamePattern = re.compile(dataload.illustNameRegex, re.S)
-        arthor_name = re.findall(illustNamePattern, web_src)[0][10:-1]
+        arthor_name = re.findall(illustNamePattern, web_src)[0]
 
         # mate max count
         pattern = re.compile(dataload.illustAWCntRegex, re.S)
-        maxCntword = re.findall(pattern, web_src)[1][5:-2]
+        maxCntword = re.findall(pattern, web_src)[1][:-1]
         maxCnt = int(maxCntword)
 
         return maxCnt, arthor_name
@@ -82,46 +82,17 @@ class IllustratorRepos(object):
         # each page cut thumbnail image url
         web_src = response.read().decode("UTF-8", "ignore")
 
-        # build need regex
+        # size info in webpage source
         imgWholeInfoPattern = re.compile(dataload.imgWholeInfoRegex, re.S)
-        datasrcPattern = re.compile(dataload.datasrcRegex, re.S)
         imageNamePattern = re.compile(dataload.imagesNameRegex, re.S)
-        spanPattern = re.compile(dataload.imgSpancnt, re.S)
-
-        imgWholeInfo = re.findall(imgWholeInfoPattern, web_src)     # <li class="image-item"> whole word
-        imagesName = []
-        targetUrls = []
-        # image have 3 format: jpg/png/gif
-        # this crawler will give gif format up and crawl png or jpg
-        # pixiv one repo maybe have multi-images
-        for item in imgWholeInfo:
-            thumbnail = re.findall(datasrcPattern, item)[0]         # mate thumbnail image
-            judgeWord = thumbnail[-19:-1]
-            # check jpg/png or gif
-            if judgeWord == dataload.judgeWord:
-                span_nbr = re.findall(spanPattern, item)
-                # catch vaild word from thumbnail url
-                vaildWord = thumbnail[54:-19]                       # cut vaild words
-                # try to check multi-span images
-                if len(span_nbr) != 0:                              # non-empty list
-                    for p in range(int(span_nbr[0][6:-7])):
-                        # mate image name
-                        imageName = re.findall(imageNamePattern, item)[0][10:-1]
-                        imagesName.append(imageName)
-                        target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(p)
-                        targetUrls.append(target_url)
-                else:
-                    imageName = re.findall(imageNamePattern, item)[0][10:-1]
-                    imagesName.append(imageName)
-                    target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(0)
-                    targetUrls.append(target_url)
-            else:                                                   # give up gif format
-                pass
+        sizerResult = pvmx.data_sizer(imgWholeInfoPattern, imageNamePattern, web_src)
+        targetURLs = sizerResult[0]
+        imageName = sizerResult[1]
 
         logContext = "mainpage %d data gather finished" % array
         pvmx.logprowork(logpath, logContext)
 
-        return targetUrls, imagesName
+        return targetURLs, imageName
 
     def crawl_allpage_target(self, nbr, arthor_name, logpath):
         """
@@ -164,8 +135,8 @@ class IllustratorRepos(object):
         for i in allTargeturls[:capCnt]:
             capTargets.append(i)                                    # cut need count
             img_id = i[57:-7]
-            basePage = dataload.baseWebURL + img_id
             artworkIDs.append(img_id)                               # image id list
+            basePage = dataload.baseWebURL + img_id
             basePages.append(basePage)                              # basic page list
         # log images info
         logContext = 'illustrator: ' + arthor_name + ' id: ' + self.illustInputID + ' artworks info====>'
@@ -183,12 +154,11 @@ class IllustratorRepos(object):
         :return:    none
         """
         pvmx.mkworkdir(self.logpath, self.workdir)
-
         starttime = time.time()
 
         pvmx.camouflage_login(self.logpath)                         # login website, key step
         # gather info and data
-        info = self.gather_preloadinfo(self.logpath)
+        info = self.gather_preloadinfo()
         datas = self.crawl_allpage_target(info[0], info[1], self.logpath)
         # download images
         pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)

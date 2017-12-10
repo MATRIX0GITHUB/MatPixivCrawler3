@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v0p8_LTE'
+__version__         = 'v0p9_LTE'
 
 import urllib.request, urllib.parse, urllib.error
 import time, os, linecache
@@ -243,18 +243,15 @@ def build_original_headers(referer):
 # mate web src need word strip
 
 postKeyRegex = 'key".*?"(.*?)"'                                     # mate post key
-rankTitleRegex = '<section.*?data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
-rankVWRegex = 'r/img/.*?_'                                          # from dailyRank page gather vaild words
+rankTitleRegex = 'data-rank-text="(.*?)" data-title="(.*?)" data-user-name="(.*?)" data-date="(.*?)".*?data-id="(.*?)"'
 nbrRegex = '\d+\.?\d*'                                              # mate any number
-imgThumbnailRegex = '<img src="(.*?)"'                              # mate thumbnail image
-imgWholeInfoRegex = 'image-item">.*?</li>'                          # catch <li class="image-item">...</li>
-datasrcRegex = 'data-src=".*?"'
-illustNameRegex = 'me"title=".*?"'                                  # mate illust name
-imagesNameRegex = 'e" title=".*?"'                                  # mate mainpage images name
-proxyServerRegex = 'tr'                                             # use beautifulsoup module, easy
-arrangeProxyServerRegex = 'td'                                      # cut gather list
-illustAWCntRegex = 'dge">.*?<'                                      # illust artwork count mate
-imgSpancnt = '<span>.*?</span>'                                     # gather one span image count
+imgWholeInfoRegex = '<li class="image-item">(.*?)</li>'             # catch <li class="image-item">...</li>
+datasrcRegex = 'data-src="(.*?)"'                                   # thumbnail mate
+illustNameRegex = 'me"title="(.*?)"'                                # mate illust name
+imagesNameRegex = 'e" title="(.*?)"'                                # mate mainpage images name
+illustAWCntRegex = 'dge">(.*?)<'                                    # illust artwork count mate
+imgSpancnt = '<span>(.*?)</span>'                                   # gather one span image count
+rankSectionRegex = '<section id=(.*?)</section>'                    # ranking top whole info
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
