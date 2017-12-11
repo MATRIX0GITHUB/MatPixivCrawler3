@@ -37,54 +37,57 @@ class DWMRankingTop(object):
         imgCnt = ''
         if ormode == 'o' or ormode == '1':
             # input a string for request image number
-            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank top image count(max is %d): ' % whole_nbr))
+            imgCnt = int(input(dataload.SHELLHEAD +
+                        'gather whole ordinary vaild target %d, enter you want: ' % whole_nbr))
             while imgCnt > whole_nbr:
                 print(dataload.SHELLHEAD + 'input error, rank top at most %d' % whole_nbr)
-                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % whole_nbr))
+                imgCnt = int(input(dataload.SHELLHEAD +
+                        'enter again(max is %d): ' % whole_nbr))
         elif ormode == 'r' or ormode == '2':
             # input a string for request image number
-            imgCnt = int(input(dataload.SHELLHEAD + 'enter crawl rank R18 top image count(max is %d): ' % whole_nbr))
+            imgCnt = int(input(dataload.SHELLHEAD +
+                        'gather whole R18 vaild target %d, enter you want: ' % whole_nbr))
             while imgCnt > whole_nbr:
                 print(dataload.SHELLHEAD + 'input error, rank R18 top at most %d' % whole_nbr)
-                imgCnt = int(input(dataload.SHELLHEAD + 'enter again(max is %d): ' % whole_nbr))
+                imgCnt = int(input(dataload.SHELLHEAD +
+                        'enter again(max is %d): ' % whole_nbr))
         else:
             pass
 
         return imgCnt
 
-    def gather_rankingdata(self):
+    def target_confirm(self):
         """
-        crawl dailyRank list
+        input option and confirm target
         :param self:    self class
-        :return:        original images urls list
+        :return:        request mainpage url, mode
         """
-        logContext = 'gather rank list======>'
+        logContext = 'gather ranking list======>'
         pvmx.logprowork(self.logpath, logContext)
-
-        rankWord = ''
-        page_url = ''
-        ormode = input(dataload.SHELLHEAD + 'select ordinary top or r18 top(tap "o"&"1" or "r"&"2"): ')
+        rankWord = None
+        req_url = None
+        ormode = input(dataload.SHELLHEAD + 'select ranking type, ordinary(o|1) or r18(r|2): ')
         if ormode == 'o' or ormode == '1':
-            dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2)/monthly(3) rank top: ')
+            dwm = input(dataload.SHELLHEAD + 'select daily(1)|weekly(2)|monthly(3) ordinary ranking type: ')
             if dwm == '1':
-                page_url = dataload.dailyRankURL
+                req_url = dataload.dailyRankURL
                 rankWord = 'daily'
             elif dwm == '2':
-                page_url = dataload.weeklyRankURL
+                req_url = dataload.weeklyRankURL
                 rankWord = 'weekly'
             elif dwm == '3':
-                page_url = dataload.monthlyRankURL
+                req_url = dataload.monthlyRankURL
                 rankWord = 'monthly'
             else:
                 print(dataload.SHELLHEAD + "argv(s) error\n")
             logContext = 'crawler set target to %s rank top' % rankWord
         elif ormode == 'r' or ormode == '2':
-            dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2) R18 rank top: ')
+            dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2) R18 ranking type: ')
             if dwm == '1':
-                page_url = dataload.dailyRankURL_R18
+                req_url = dataload.dailyRankURL_R18
                 rankWord = 'daily'
             elif dwm == '2':
-                page_url = dataload.weeklyRankURL_R18
+                req_url = dataload.weeklyRankURL_R18
                 rankWord = 'weekly'
             else:
                 print(dataload.SHELLHEAD + "argv(s) error\n")
@@ -92,6 +95,19 @@ class DWMRankingTop(object):
         else:
             print(dataload.SHELLHEAD + "argv(s) error\n")
         pvmx.logprowork(self.logpath, logContext)
+
+        return req_url, ormode
+
+    def gather_rankingdata(self):
+        """
+        crawl dailyRank list
+        :param self:    self class
+        :return:        original images urls list
+        """
+        option = self.target_confirm()
+        page_url = option[0]
+        ormode = option[1]
+
         response = pvmx.opener.open(fullurl=page_url,
                                     data=pvmx.getData,
                                     timeout=30)

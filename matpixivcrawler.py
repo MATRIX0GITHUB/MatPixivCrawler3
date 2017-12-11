@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon(LeaderN)
-# ===============================================================y======
+# =====================================================================
 # this python script is built to add a example to call class lib
 
 import dataload                                                     # storage data and strings

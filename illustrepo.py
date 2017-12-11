@@ -107,7 +107,7 @@ class IllustratorRepos(object):
         if nbr <= 20:
             needPagecnt = 1                                         # nbr <= 20, request once
         else:
-            needPagecnt = int(nbr / 20) + 1                         # calcus need request count
+            needPagecnt = int(nbr / 20) + 1                         # only need integer
 
         # gather all data(thumbnail images and names)
         allTargeturls = []

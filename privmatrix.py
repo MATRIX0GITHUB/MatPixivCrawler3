@@ -26,7 +26,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 0.9.0 LTE                                                                                                             #
+    #    Version: 1.0.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -191,8 +191,8 @@ class Matrix:
         :param web_src:         webpage source
         :return:                original target urls, image infos
         """
-        infos = []
-        targetUrls = []
+        infoGroup = []
+        urlGroup = []
         datasrcPattern = re.compile(dataload.datasrcRegex, re.S)
         spanPattern = re.compile(dataload.imgSpancnt, re.S)
         imgWholeInfo = re.findall(wholePattern, web_src)
@@ -200,33 +200,34 @@ class Matrix:
         # this crawler will give gif format up and crawl png or jpg
         # pixiv one repo maybe have multi-images
         for item in imgWholeInfo:
-            thumbnail = re.findall(datasrcPattern, item)[0]  # mate thumbnail image
-            judgeWord = thumbnail[-18:]  # _p0_master1200.jpg
+            thumbnail = re.findall(datasrcPattern, item)[0]         # mate thumbnail image
+            judgeWord = thumbnail[-18:]                             # _p0_master1200.jpg
             # check jpg/png or gif
             if judgeWord == dataload.judgeWord:
                 span_nbr = re.findall(spanPattern, item)
                 # catch vaild word from thumbnail url
-                vaildWord = thumbnail[44:-18]  # cut vaild words
+                vaildWord = thumbnail[44:-18]                       # cut vaild words
                 # try to check multi-span images
-                if len(span_nbr) != 0:  # non-empty list
+                if len(span_nbr) != 0:                              # non-empty list
                     for p in range(int(span_nbr[0])):
                         # gather image info
                         info = re.findall(infoPattern, item)[0]
-                        infos.append(info)
+                        infoGroup.append(info)
                         # build original image url
                         target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(p)
-                        targetUrls.append(target_url)
+                        urlGroup.append(target_url)
                 else:
                     # gather image info
                     info = re.findall(infoPattern, item)[0]
-                    infos.append(info)
+                    infoGroup.append(info)
                     # build original image url
                     target_url = dataload.imgOriginalheader + vaildWord + dataload.imgOriginaltail(0)
-                    targetUrls.append(target_url)
-            else:  # give up gif format
+                    urlGroup.append(target_url)
+            # give up gif format
+            else:
                 pass
 
-        return targetUrls, infos
+        return urlGroup, infoGroup
 
     @retry
     def save_oneimage(self, index, url, basepages, savepath, logpath):
