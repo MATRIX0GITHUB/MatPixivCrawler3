@@ -13,7 +13,8 @@ from collections import OrderedDict
 import time, random, re, os
 import dataload
 
-proxyHascreated = False                                             # global var init value
+# global var init value
+proxyHascreated = False
 
 class Matrix:
     """
@@ -176,7 +177,7 @@ class Matrix:
         :param logpath: log save path
         :return:        none
         """
-        htmlfile = open(workdir + dataload.symbol + 'test.html', "w")
+        htmlfile = open(workdir + dataload.storage[1] + 'test.html', "w")
         htmlfile.write(content)
         htmlfile.close()
         logContext = 'save request html page ok'
@@ -304,7 +305,7 @@ class Matrix:
             logContext = 'capture target no.%d image ok' % (index + 1)
             self.logprowork(logpath, logContext)
             # this step will delay much time
-            with open(savepath + dataload.symbol + image_name + '.' + imgDatatype, 'wb') as img:
+            with open(savepath + dataload.storage[1] + image_name + '.' + imgDatatype, 'wb') as img:
                 img.write(imgBindata)
             logContext = 'download no.%d image finished' % (index + 1)
             self.logprowork(logpath, logContext)
@@ -401,7 +402,7 @@ class Matrix:
                             "this.height = this.attributes['oriHeight'].value;}}}};</script>")
         for i in os.listdir(workdir):
             if i[-4:len(i)] in [".png", ".jpg", ".bmp"]:            # support image format
-                width, height = Image.open(workdir + dataload.symbol + i).size
+                width, height = Image.open(workdir + dataload.storage[1] + i).size
                 i = i.replace("#", "%23")
                 ## htmlFile.writelines("<a href = \"%s\">"%("./" + filename))
                 # set image source line
@@ -430,7 +431,7 @@ class Matrix:
             + ' technology support\n'                                   \
             'Code by ' + dataload.__organization__ + '@' + dataload.__author__
         self.logprowork(logpath, logContext)
-        os.system(dataload.filemanager + ' ' + dataload.work_dir)   # open file-manager to check result
+        os.system(dataload.storage[2] + ' ' + dataload.storage[0])  # open file-manager to check result
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

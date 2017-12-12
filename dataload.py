@@ -14,10 +14,15 @@ import urllib.request, urllib.parse, urllib.error
 import time, os, linecache
 import getpass
 
+# define some global variable
+SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
+# work directory
+storage = []
+# login datas
+loginData = []
+
 # ======================get format time, and get year-month-date to be a folder name===============================
 # work directory
-
-SHELLHEAD = 'MatPixivCrawler@' + __organization__ + ':~$ '          # copy linux head symbol
 
 def platform_setting():
     """
@@ -25,37 +30,36 @@ def platform_setting():
     folder must with directory symbol '/' or '\\'
     :return:    platform work directory
     """
-    homeFolder = ''
-    folderSymbol = ''
-    fileManager = ''
+    # call global variables
+    work_dir = None
+    symbol = None
+    fileManager = None
+    global storage
     # linux
     if os.name == 'posix':
-        homeFolder = '/home/neod-anderjon/Pictures/Crawler/'
-        folderSymbol = '/'
+        work_dir = '/home/neod-anderjon/Pictures/Crawler/'
+        symbol = '/'
         fileManager = 'nautilus'
     # windows
     elif os.name == 'nt':
-        homeFolder = 'E:\\Workstation_Files\\PictureDatabase\\Crawler\\'
-        folderSymbol = '\\'
+        work_dir = 'E:\\Workstation_Files\\PictureDatabase\\Crawler\\'
+        symbol = '\\'
         fileManager = 'explorer'
     else:
         pass
 
-    return homeFolder, folderSymbol, fileManager
-
-platform = platform_setting()
-work_dir = platform[0]
-symbol = platform[1]
-filemanager = platform[2]
+    # call a global list
+    storage = [work_dir, symbol, fileManager]
+platform_setting()
 
 # real time clock
 rtc = time.localtime()
 ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 
 # universal path
-logfile_name = symbol + 'CrawlerWork[%s].log' % ymd
-htmlfile_name = symbol + 'CrawlerWork[%s].html' % ymd
-ranking_folder = work_dir + 'RankTop_%s%s' % (ymd, symbol)
+logfile_name = storage[1] + 'CrawlerWork[%s].log' % ymd
+htmlfile_name = storage[1] + 'CrawlerWork[%s].html' % ymd
+ranking_folder = storage[0] + 'rankingtop_%s%s' % (ymd, storage[1])
 # daily-rank path
 logfile_path = ranking_folder + logfile_name
 htmlfile_path = ranking_folder + htmlfile_name
@@ -73,8 +77,9 @@ def login_infopreload():
     =================================
     :return:    username, password, get data
     """
+    global loginData
     print("###################################login data check###################################")
-    loginFilePath = os.getcwd() + '/' + 'login.cr'                  # get local dir path
+    loginFilePath = os.getcwd() + storage[1] + 'login.cr'           # get local dir path
     isLoginCrExisted = os.path.exists(loginFilePath)
     if isLoginCrExisted:
         userMailBox = linecache.getline(loginFilePath, 2)           # row 2, usernamemail
@@ -108,8 +113,9 @@ def login_infopreload():
     getwayRegInfo = [('user', username), ('pass', passwd)]
     getData = urllib.parse.urlencode(getwayRegInfo).encode(encoding='UTF8')
 
-    return username, passwd, getData
-loginData = login_infopreload()                                    # preduce call once
+    # save in a list
+    loginData = [username, passwd, getData]
+login_infopreload()
 
 # ========================================some use url address=====================================================
 # login request must be https proxy format, request page or image must be http proxy

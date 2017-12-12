@@ -143,7 +143,7 @@ class IllustratorRepos(object):
         pvmx.logprowork(logpath, logContext)
 
         for k, i in enumerate(allArtworkName[:capCnt]):
-            logContext = 'no.%d image: [%s id: %s url: %s]' % ((k + 1), i, artworkIDs[k], capTargets[k])
+            logContext = 'no.%d image: [%s | id: %s | url: %s]' % ((k + 1), i, artworkIDs[k], capTargets[k])
             pvmx.logprowork(logpath, logContext)
 
         return capTargets, basePages

@@ -94,6 +94,7 @@ class DWMRankingTop(object):
             logContext = 'crawler set target to %s r18 rank top' % rankWord
         else:
             print(dataload.SHELLHEAD + "argv(s) error\n")
+            logContext = None
         pvmx.logprowork(self.logpath, logContext)
 
         return req_url, ormode
@@ -107,14 +108,12 @@ class DWMRankingTop(object):
         option = self.target_confirm()
         page_url = option[0]
         ormode = option[1]
-
         response = pvmx.opener.open(fullurl=page_url,
                                     data=pvmx.getData,
                                     timeout=30)
         if response.getcode() == dataload.reqSuccessCode:
             logContext = 'website response successed'
         else:
-            # response failed, you need to check network status
             logContext = 'website response fatal, return code %d' % response.getcode()
         pvmx.logprowork(self.logpath, logContext)
         web_src = response.read().decode("UTF-8", "ignore")
@@ -133,7 +132,7 @@ class DWMRankingTop(object):
         basePages = []                                              # request original image need referer
         for k, i in enumerate(imgInfos[:img_nbr]):
             # rank-array    image-name  arthur-name     arthur-id   original-image-url
-            logContext = 'no.%d image: [%s name: %s illustrator: %s id: %s url: %s]' \
+            logContext = 'no.%d image: [%s | name: %s | illustrator: %s | id: %s | url: %s]' \
                          % (k + 1, i[0], i[1], i[2], i[4], targetURLs[k])
             pvmx.logprowork(self.logpath, logContext)
             basePages.append(dataload.baseWebURL + i[4])            # every picture url address: base_url address + picture_id
