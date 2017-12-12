@@ -15,14 +15,15 @@ class IllustratorRepos(object):
     every illustrator in Pixiv has own mainpage
     this class include fuction will crawl all of those page all images
     """
-    def __init__(self, iid, workdir, logname, htmlname):
+    def __init__(self, workdir, logname, htmlname):
         """
-        :param iid:         illustrator id
         :param workdir:     work directory
         :param logname:     log name
         :param htmlname:    html name
         """
-        self.illustInputID = iid
+        targetID = input(dataload.SHELLHEAD
+                         + 'target crawl illustrator pixiv-id: ')
+        self.illustInputID = targetID
         self.workdir = workdir + self.illustInputID
         self.logpath = self.workdir + logname
         self.htmlpath = self.workdir + htmlname

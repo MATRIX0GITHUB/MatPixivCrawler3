@@ -13,21 +13,18 @@ if __name__ == '__main__':
 
     mode = input(dataload.SHELLHEAD + 'select mode: ')
     if mode == 'rtn' or mode == '1':
-        # create work class
         rtn_work = rankingtop.DWMRankingTop(
-            dataload.ranking_folder,
-            dataload.logfile_path,
-            dataload.htmlfile_path)
+                                dataload.ranking_folder,
+                                # input file path
+                                dataload.logfile_path,
+                                dataload.htmlfile_path)
         rtn_work.start()
     elif mode == 'ira' or mode == '2':
-        targetID = input(dataload.SHELLHEAD
-                         + 'target crawl illustrator pixiv-id: ')
-        # create work class
         ira_work = illustrepo.IllustratorRepos(
-            targetID,
-            dataload.storage[0],
-            dataload.logfile_name,
-            dataload.htmlfile_name)
+                                dataload.repo_folder,
+                                # input file name
+                                dataload.logfile_name,
+                                dataload.htmlfile_name)
         ira_work.start()
     elif mode == 'help' or mode == '3':
         print(privmatrix.Matrix().__doc__)
