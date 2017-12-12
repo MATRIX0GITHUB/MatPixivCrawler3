@@ -25,7 +25,7 @@ if __name__ == '__main__':
         # create work class
         ira_work = illustrepo.IllustratorRepos(
             targetID,
-            dataload.work_dir,
+            dataload.storage[0],
             dataload.logfile_name,
             dataload.htmlfile_name)
         ira_work.start()
