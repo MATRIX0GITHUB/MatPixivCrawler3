@@ -12,6 +12,7 @@ if __name__ == '__main__':
     print(privmatrix.Matrix().__doc__)
 
     mode = input(dataload.SHELLHEAD + 'select mode: ')
+    # ranking top mode
     if mode == 'rtn' or mode == '1':
         rtn_work = rankingtop.DWMRankingTop(
                                 dataload.ranking_folder,
@@ -19,6 +20,7 @@ if __name__ == '__main__':
                                 dataload.logfile_path,
                                 dataload.htmlfile_path)
         rtn_work.start()
+    # illustrator repo all mode
     elif mode == 'ira' or mode == '2':
         ira_work = illustrepo.IllustratorRepos(
                                 dataload.repo_folder,
@@ -26,6 +28,7 @@ if __name__ == '__main__':
                                 dataload.logfile_name,
                                 dataload.htmlfile_name)
         ira_work.start()
+    # others
     elif mode == 'help' or mode == '3':
         print(privmatrix.Matrix().__doc__)
     else:

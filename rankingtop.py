@@ -153,11 +153,9 @@ class DWMRankingTop(object):
         pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
 
         endtime = time.time()
-        logContext = "elapsed time: %0.2fs" % (endtime - starttime)
-        pvmx.logprowork(self.logpath, logContext)
-
+        elapseTime = endtime - starttime
         pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
-        pvmx.work_finished(self.logpath)
+        pvmx.work_finished(elapseTime, self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

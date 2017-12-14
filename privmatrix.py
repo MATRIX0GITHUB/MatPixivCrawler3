@@ -15,6 +15,7 @@ import dataload
 
 # global var init value
 proxyHascreated = False
+allDownloadpool = 0
 
 class Matrix:
     """
@@ -27,7 +28,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.1.0 LTE                                                                                                             #
+    #    Version: 1.2.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -65,6 +66,7 @@ class Matrix:
         :return:        folder create path
         """
         # create a folder to save picture
+        print(dataload.SHELLHEAD + 'crawler work directory setting: ' + folder)
         isFolderExisted = os.path.exists(folder)
         if not isFolderExisted:
             os.makedirs(folder)
@@ -243,13 +245,14 @@ class Matrix:
         :return:            none
         """
         # set images download arguments
+        global allDownloadpool                                      # whole download pool
+        global proxyHascreated
         timeout = 30                                                # default set to 30s
         imgDatatype = 'png'                                         # default png format
         image_name = url[57:-4]                                     # id+_px
 
         # preload proxy, just once
         proxy_handler = None
-        global proxyHascreated
         if proxyHascreated is False:
             proxyHascreated = True                                  # no reset
             proxy = self.getproxyserver(logpath)
@@ -302,7 +305,9 @@ class Matrix:
         if response.getcode() == dataload.reqSuccessCode:
             # save response data to image format
             imgBindata = response.read()
-            logContext = 'capture target no.%d image ok' % (index + 1)
+            sourceSize = float(len(imgBindata) / 1024)              # get image size
+            allDownloadpool += sourceSize                           # calcus download source whole size
+            logContext = 'capture target no.%d image ok, image size: %dKB' % (index + 1, sourceSize)
             self.logprowork(logpath, logContext)
             # this step will delay much time
             with open(savepath + dataload.storage[1] + image_name + '.' + imgDatatype, 'wb') as img:
@@ -376,7 +381,7 @@ class Matrix:
             aliveThreadCnt = threading.active_count()
             logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
             self.logprowork(logpath, logContext)
-        logContext = 'all of threads reclaim, download finished=====>'
+        logContext = 'all of threads reclaim, download process end'
         self.logprowork(logpath, logContext)
 
     def htmlpreview_build(self, workdir, htmlpath, logpath):
@@ -416,22 +421,34 @@ class Matrix:
         logContext = 'image browse html generate finished'
         self.logprowork(logpath, logContext)
 
-    def work_finished(self, logpath):
+    def work_finished(self, elapsedTime, logpath):
         """
         work finished log
-        :param logpath: log save path
-        :return:        none
+        :param elapsedTime: elapsed time
+        :param logpath:     log save path
+        :return:            none
         """
+        # calcus average download speed and whole elapesd time
+        global allDownloadpool
+        averageDownloadSpeed = float(allDownloadpool / elapsedTime)
+        logContext = "elapsed time: %0.2fs, average download speed: %0.2fKB/s" % (elapsedTime, averageDownloadSpeed)
+        self.logprowork(logpath, logContext)
+
+        # end time log
         rtc = time.localtime()                                      # real log get
         ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
         logContext = "crawler work finished, log time: " + ymdhms
         self.logprowork(logpath, logContext)
+
+        # logo display
         logContext = \
             dataload.__laboratory__ + ' ' + dataload.__organization__ \
             + ' technology support\n'                                   \
             'Code by ' + dataload.__organization__ + '@' + dataload.__author__
+
+        # open work directory, check result
         self.logprowork(logpath, logContext)
-        os.system(dataload.storage[2] + ' ' + dataload.storage[0])  # open file-manager to check result
+        os.system(dataload.storage[2] + ' ' + dataload.storage[0])
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

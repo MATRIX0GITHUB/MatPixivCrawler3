@@ -22,9 +22,9 @@ class IllustratorRepos(object):
         :param htmlname:    html name
         """
         targetID = input(dataload.SHELLHEAD
-                         + 'target crawl illustrator pixiv-id: ')
+                    + 'target crawl illustrator pixiv-id: ')
         self.illustInputID = targetID
-        self.workdir = workdir + self.illustInputID
+        self.workdir = workdir + self.illustInputID                 # use id name folder
         self.logpath = self.workdir + logname
         self.htmlpath = self.workdir + htmlname
 
@@ -88,12 +88,12 @@ class IllustratorRepos(object):
         imageNamePattern = re.compile(dataload.imagesNameRegex, re.S)
         sizerResult = pvmx.data_sizer(imgWholeInfoPattern, imageNamePattern, web_src)
         targetURLs = sizerResult[0]
-        imageName = sizerResult[1]
+        imageNames = sizerResult[1]
 
         logContext = "mainpage %d data gather finished" % array
         pvmx.logprowork(logpath, logContext)
 
-        return targetURLs, imageName
+        return targetURLs, imageNames
 
     def crawl_allpage_target(self, nbr, arthor_name, logpath):
         """
@@ -165,11 +165,9 @@ class IllustratorRepos(object):
         pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
 
         endtime = time.time()
-        logContext = "elapsed time: %0.2fs" % (endtime - starttime)
-        pvmx.logprowork(self.logpath, logContext)
-
+        elapseTime = endtime - starttime
         pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
-        pvmx.work_finished(self.logpath)
+        pvmx.work_finished(elapseTime, self.logpath)
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
