@@ -27,7 +27,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.2.0 LTE                                                                                                             #
+    #    Version: 1.3.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -366,6 +366,7 @@ class Matrix:
         :param logpath:     log save path
         :return:            none
         """
+        global allDownloadpool
         queueLength = len(urls)
         logContext = 'start to download %d target(s)======>' % queueLength
         self.logprowork(logpath, logContext)
@@ -373,6 +374,7 @@ class Matrix:
         lock = threading.Lock()                                     # object lock
         sub_thread = None
         aliveThreadCnt = queueLength                                # init value
+        starttime = time.time()
         for i, img_url in enumerate(urls):
             # create overwrite threading.Thread object
             sub_thread = self.MultiThreading(lock, i, img_url, base_pages, workdir, logpath)
@@ -386,7 +388,11 @@ class Matrix:
             aliveThreadCnt = threading.active_count()
             logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
             self.logprowork(logpath, logContext)
-        logContext = 'all of threads reclaim, download process end'
+        endtime = time.time()
+        # calcus average download speed and whole elapesd time
+        elapesdTime = endtime - starttime
+        averageDownloadSpeed = float(allDownloadpool / elapesdTime)
+        logContext = "all of threads reclaim, elapsed time: %0.2fs, average download speed: %0.2fKB/s" % (elapesdTime, averageDownloadSpeed)
         self.logprowork(logpath, logContext)
 
     def htmlpreview_build(self, workdir, htmlpath, logpath):
@@ -426,19 +432,13 @@ class Matrix:
         logContext = 'image browse html generate finished'
         self.logprowork(logpath, logContext)
 
-    def work_finished(self, elapsedTime, logpath):
+    def work_finished(self, logpath):
         """
         work finished log
         :param elapsedTime: elapsed time
         :param logpath:     log save path
         :return:            none
         """
-        # calcus average download speed and whole elapesd time
-        global allDownloadpool
-        averageDownloadSpeed = float(allDownloadpool / elapsedTime)
-        logContext = "elapsed time: %0.2fs, average download speed: %0.2fKB/s" % (elapsedTime, averageDownloadSpeed)
-        self.logprowork(logpath, logContext)
-
         # end time log
         rtc = time.localtime()                                      # real log get
         ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
