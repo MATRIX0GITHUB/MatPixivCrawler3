@@ -5,7 +5,6 @@
 # this python script is built to create a private library use in this crawler
 
 import urllib.request, urllib.parse, urllib.error, http.cookiejar
-from bs4 import BeautifulSoup
 from retrying import retry
 import threading
 from PIL import Image
@@ -93,24 +92,28 @@ class Matrix:
                                         headers=psHeaders)
         response = urllib.request.urlopen(request,
                                           timeout=30)
-        proxyRawwords = []
+
         if response.getcode() == dataload.reqSuccessCode:
             logContext = 'crawl proxy successed'
-            web_src = response.read().decode("UTF-8", "ignore")
-            proxyRawwords = BeautifulSoup(web_src, 'lxml').find_all('tr') # mate tr tag class
         else:
             logContext = 'crawl proxy failed, return code: %d' % response.getcode()
         self.logprowork(logpath, logContext)
-        ip_list = []
-        for i in range(1, len(proxyRawwords)):
-            ip_info = proxyRawwords[i]
-            tds = ip_info.find_all('td')                            # mate td tag class
-            # build a format: ip:port
-            ip_list.append('http://' + tds[1].text + ':' + tds[2].text)
 
-        proxy_ip = random.choice(ip_list)                           # random choose a proxy
-        proxyServer = {'http': proxy_ip}                            # setting proxy server
-        logContext = 'choose proxy server: ' + proxy_ip
+        web_src = response.read().decode("UTF-8", "ignore")
+        proxyPattern = re.compile(dataload.proxyRegex, re.S)
+        proxyRawwords = re.findall(proxyPattern, web_src)
+        proxy_iplist = []
+        for i in range(len(proxyRawwords)):
+            if i % 5 == 0 and proxyRawwords[i].isdigit():           # analysis port num
+                # build proxy ip string
+                proxy_ip = dataload.proxyBuilder(i, proxyRawwords)  # build proxy ip
+                proxy_iplist.append(proxy_ip)
+            else:
+                pass
+        proxy_choose = random.choice(proxy_iplist)                  # random choose a proxy
+        proxyServer = {'http': proxy_choose}                        # setting proxy server
+
+        logContext = 'choose proxy server: ' + proxy_choose
         self.logprowork(logpath, logContext)
 
         return proxyServer
@@ -247,16 +250,10 @@ class Matrix:
         # set images download arguments
         global allDownloadpool                                      # whole download pool
         global proxyHascreated
+        proxy_handler = None
         timeout = 30                                                # default set to 30s
         imgDatatype = 'png'                                         # default png format
         image_name = url[57:-4]                                     # id+_px
-
-        # preload proxy, just once
-        proxy_handler = None
-        if proxyHascreated is False:
-            proxyHascreated = True                                  # no reset
-            proxy = self.getproxyserver(logpath)
-            proxy_handler = urllib.request.ProxyHandler(proxy)
 
         # setting headers
         headers = dataload.build_original_headers(basepages[index])
@@ -289,6 +286,14 @@ class Matrix:
                         # if timeout, use proxy reset request
                         logContext = "change proxy server"
                         self.logprowork(logpath, logContext)
+
+                        # preload proxy, just once
+                        if proxyHascreated is False:
+                            proxyHascreated = True  # no reset
+                            proxy = self.getproxyserver(logpath)
+                            proxy_handler = urllib.request.ProxyHandler(proxy)
+                        else:
+                            pass
                         self.opener = urllib.request.build_opener(proxy_handler) # add proxy handler
                         response = self.opener.open(fullurl=changeToJPGurl,
                                                     timeout=timeout)

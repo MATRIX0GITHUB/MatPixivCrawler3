@@ -148,6 +148,7 @@ mainPage = 'http://www.pixiv.net/member_illust.php?id='             # illust mai
 mainPagemiddle = '&type=all'                                        # url middle word
 mainPagetail = '&p='                                                # url tail word
 judgeWord = '_p0_master1200.jpg'                                    # judge gif or jpg/png
+proxyBuilder = lambda index, _list:'http://' + _list[index - 1] + ':' + _list[index]
 
 # ==================================http request headers include data============================================
 # request use data, from browser javascript or fiddler
@@ -260,6 +261,7 @@ imagesNameRegex = 'e" title="(.*?)"'                                # mate mainp
 illustAWCntRegex = 'dge">(.*?)<'                                    # illust artwork count mate
 imgSpancnt = '<span>(.*?)</span>'                                   # gather one span image count
 rankSectionRegex = '<section id=(.*?)</section>'                    # ranking top whole info
+proxyRegex = '<td>(.*?)</td>'                                       # proxy website data mate
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)
