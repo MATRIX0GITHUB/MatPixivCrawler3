@@ -6,23 +6,17 @@
 
 import dataload                                                     # storage data and strings
 import privmatrix                                                   # private crawler library
-from modeoption import DWMRankingTop, IllustratorRepos
+from modeoption import RankingTop, ReposAll
 
 def main():
     print(privmatrix.Matrix().__doc__)
 
     mode = input(dataload.SHELLHEAD + 'select mode: ')
     if mode == 'rtn' or mode == '1':
-        buildTask = DWMRankingTop(
-            dataload.ranking_folder,
-            dataload.logfile_path,
-            dataload.htmlfile_path)
+        buildTask = RankingTop(dataload.rankdir, dataload.logpath, dataload.htmlpath)
         buildTask.start()
     elif mode == 'ira' or mode == '2':
-        buildTask = IllustratorRepos(
-            dataload.repo_folder,
-            dataload.logfile_name,
-            dataload.htmlfile_name)
+        buildTask = ReposAll(dataload.repodir, dataload.logname, dataload.htmlname)
         buildTask.start()
     elif mode == 'help' or mode == '3':
         print(privmatrix.Matrix().__doc__)

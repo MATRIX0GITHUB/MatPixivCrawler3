@@ -9,10 +9,10 @@ import dataload, privmatrix
 
 pvmx = privmatrix.Matrix()
 
-class DWMRankingTop(object):
+class RankingTop(object):
     """
     Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
-    this class include fuction will gather all of those rank
+    this class include fuction will gather all of those ranks
     """
     def __init__(self, workdir, logpath, htmlpath):
         """
@@ -149,13 +149,13 @@ class DWMRankingTop(object):
         pvmx.camouflage_login(self.logpath)
 
         option = self.target_confirm(self.logpath)
-        datas = self.gather_rankingdata(option, self.logpath)
+        urlbases = self.gather_rankingdata(option, self.logpath)
 
-        pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
+        pvmx.download_alltarget(urlbases[0], urlbases[1], self.workdir, self.logpath)
         pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
         pvmx.work_finished(self.logpath)
 
-class IllustratorRepos(object):
+class ReposAll(object):
     """
     every illustrator in Pixiv has own mainpage
     this class include fuction will crawl all of those page all images
@@ -310,13 +310,12 @@ class IllustratorRepos(object):
         :return:    none
         """
         pvmx.mkworkdir(self.logpath, self.workdir)
-        pvmx.camouflage_login(self.logpath)                         # login website, key step
+        pvmx.camouflage_login(self.logpath)
 
-        # gather info and data
         info = self.gather_preloadinfo(self.illustInputID)
-        datas = self.crawl_allpage_target(self.illustInputID, info[0], info[1], self.logpath)
+        urlbases = self.crawl_allpage_target(self.illustInputID, info[0], info[1], self.logpath)
 
-        pvmx.download_alltarget(datas[0], datas[1], self.workdir, self.logpath)
+        pvmx.download_alltarget(urlbases[0], urlbases[1], self.workdir, self.logpath)
         pvmx.htmlpreview_build(self.workdir, self.htmlpath, self.logpath)
         pvmx.work_finished(self.logpath)
 

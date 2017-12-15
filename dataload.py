@@ -8,7 +8,7 @@
 __author__          = 'Neod Anderjon(LeaderN)'                      # author signature
 __laboratory__      = 'T.WKVER'                                     # lab
 __organization__    = '</MATRIX>'
-__version__         = 'v1p3_LTE'
+__version__         = 'v1p4_LTE'
 
 import urllib.request, urllib.parse, urllib.error
 import time, os, linecache
@@ -57,14 +57,14 @@ rtc = time.localtime()
 ymd = '%d-%d-%d' % (rtc[0], rtc[1], rtc[2])
 
 # universal path
-logfile_name = storage[1] + 'CrawlerWork[%s].log' % ymd
-htmlfile_name = storage[1] + 'CrawlerWork[%s].html' % ymd
-ranking_folder = storage[0] + 'rankingtop_%s%s' % (ymd, storage[1])
+logname = storage[1] + 'CrawlerWork[%s].log' % ymd
+htmlname = storage[1] + 'CrawlerWork[%s].html' % ymd
+rankdir = storage[0] + 'rankingtop_%s%s' % (ymd, storage[1])
 # rankingtop use path
-logfile_path = ranking_folder + logfile_name
-htmlfile_path = ranking_folder + htmlfile_name
+logpath = rankdir + logname
+htmlpath = rankdir + htmlname
 # illustrepo use path
-repo_folder = storage[0]
+repodir = storage[0]
 
 # ==============================================pixiv login info====================================================
 

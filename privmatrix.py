@@ -27,7 +27,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.3.0 LTE                                                                                                             #
+    #    Version: 1.4.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -37,6 +37,7 @@ class Matrix:
     """
     def __init__(self):
         # from first login save cookie and create global opener
+        # call this opener must write parameter name
         self.getData = dataload.loginData[2]                        # request images and pages GET way
         self.cookie = http.cookiejar.LWPCookieJar()                 # create a cookie words
         self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie) # add http cookie words
@@ -374,7 +375,7 @@ class Matrix:
         lock = threading.Lock()                                     # object lock
         sub_thread = None
         aliveThreadCnt = queueLength                                # init value
-        starttime = time.time()
+        starttime = time.time()                                     # log download elapsed time
         for i, img_url in enumerate(urls):
             # create overwrite threading.Thread object
             sub_thread = self.MultiThreading(lock, i, img_url, base_pages, workdir, logpath)
@@ -388,11 +389,12 @@ class Matrix:
             aliveThreadCnt = threading.active_count()
             logContext = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
             self.logprowork(logpath, logContext)
-        endtime = time.time()
         # calcus average download speed and whole elapesd time
+        endtime = time.time()
         elapesdTime = endtime - starttime
         averageDownloadSpeed = float(allDownloadpool / elapesdTime)
-        logContext = "all of threads reclaim, elapsed time: %0.2fs, average download speed: %0.2fKB/s" % (elapesdTime, averageDownloadSpeed)
+        logContext = "all of threads reclaim, elapsed time: %0.2fs, " \
+                     "average download speed: %0.2fKB/s" % (elapesdTime, averageDownloadSpeed)
         self.logprowork(logpath, logContext)
 
     def htmlpreview_build(self, workdir, htmlpath, logpath):
@@ -435,7 +437,6 @@ class Matrix:
     def work_finished(self, logpath):
         """
         work finished log
-        :param elapsedTime: elapsed time
         :param logpath:     log save path
         :return:            none
         """
