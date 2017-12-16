@@ -10,9 +10,10 @@ import dataload, privmatrix
 pvmx = privmatrix.Matrix()                                          # we need its class and global variable
 
 class RankingTop(object):
-    """
+    """Ranking top crawl mode
+
     Pixiv website has a rank top, ordinary and R18, daily, weekly, monthly
-    this class include fuction will gather all of those ranks
+    This class include fuction will gather all of those ranks
     """
     def __init__(self, workdir, log_path, html_path):
         """
@@ -26,8 +27,8 @@ class RankingTop(object):
 
     @staticmethod
     def gather_essential_info(ormode, whole_nbr):
-        """
-        get input image count
+        """Get input image count
+
         :param ormode:      select ranktop ordinary or r18 mode
         :param whole_nbr:   whole ranking crawl count
         :return:            crawl images count
@@ -53,10 +54,10 @@ class RankingTop(object):
 
     @staticmethod
     def target_confirm(log_path):
-        """
-        input option and confirm target
-        :param log_path: log save path
-        :return:        request mainpage url, mode
+        """Input option and confirm target
+
+        :param log_path:    log save path
+        :return:            request mainpage url, mode
         """
         log_context = 'gather ranking list======>'
         pvmx.logprowork(log_path, log_context)
@@ -96,8 +97,8 @@ class RankingTop(object):
         return req_url, ormode
 
     def gather_rankingdata(self, option, log_path):
-        """
-        crawl dailyRank list
+        """Crawl dailyRank list
+
         :param self:        self class
         :param option:      user choose option
         :param log_path:    log save path
@@ -137,8 +138,10 @@ class RankingTop(object):
         return target_urls[:img_nbr], basepages                     # only return need count
 
     def start(self):
-        """
-        class main call process
+        """Call method start()
+
+        First create a task, for example its name is build_task
+        Then run build_task.start() to boot this mode
         :return:    none
         """
         pvmx.mkworkdir(self.logpath, self.workdir)
@@ -152,9 +155,10 @@ class RankingTop(object):
         pvmx.work_finished(self.logpath)
 
 class RepertoAll(object):
-    """
-    every illustrator in Pixiv has own mainpage
-    this class include fuction will crawl all of those page all images
+    """Crawl any illustrator repertory all artworks
+
+    Every illustrator in Pixiv has own mainpage
+    This class include fuction will crawl all of those page all images
     """
     def __init__(self, workdir, log_name, html_name):
         """
@@ -171,8 +175,8 @@ class RepertoAll(object):
 
     @staticmethod
     def gather_preloadinfo(illust_id):
-        """
-        crawler need to know how many images do you want
+        """Crawler need to know how many images do you want
+
         :param illust_id:   illustrator id
         :return:            request images count
         """
@@ -203,13 +207,12 @@ class RepertoAll(object):
 
     @staticmethod
     def crawl_onepage_data(illust_id, array, log_path):
-        """
-        crawl all target url about images
-        page request regular:
-        no.1 referer: &type=all request url: &type=all&p=2
-        no.2 referer: &type=all&p=2 request url: &type=all&p=3
-        no.3 referer: &type=all&p=3 request url: &type=all&p=4
-        :param self:        self class
+        """Crawl all target url about images
+
+        Page request regular:
+        No.1 referer: &type=all     request url: &type=all&p=2
+        No.2 referer: &type=all&p=2 request url: &type=all&p=3
+        No.3 referer: &type=all&p=3 request url: &type=all&p=4
         :param illust_id:   illustrator id
         :param array:       count cut to every 20 images from each page, they have an array
         :param log_path:    log save path
@@ -244,8 +247,8 @@ class RepertoAll(object):
         return sizer_result                                         # output target urls and image names
 
     def crawl_allpage_target(self, illust_id, nbr, arthor_name, log_path):
-        """
-        package all gather url
+        """Package all gather url
+
         :param self:        self class
         :param illust_id:   illustrator id
         :param nbr:         package images count
@@ -299,8 +302,10 @@ class RepertoAll(object):
         return target_capture, basepages
 
     def start(self):
-        """
-        include this class run logic
+        """Call method start()
+
+        First create a task, for example its name is build_task
+        Then run build_task.start() to boot this mode
         :return:    none
         """
         pvmx.mkworkdir(self.logpath, self.workdir)

@@ -29,7 +29,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.6.0 LTE                                                                                                             #
+    #    Version: 1.7.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -47,16 +47,16 @@ class Matrix:
 
     @staticmethod
     def _login_infopreload(logincr_path):
-        """
-        get user input username and password
+        """Get user input username and password
+
         login.cr file example:
         =================================
         [login]
         <mail>
         <passwd>
         =================================
-        :param login_file_path:
-        :return:    username, password, get data
+        :param logincr_path:    login.cr file path
+        :return:                username, password, get data
         """
         is_login_file_existed = os.path.exists(logincr_path)
         if is_login_file_existed:
@@ -96,8 +96,8 @@ class Matrix:
 
     @staticmethod
     def logprowork(log_path, log_content):
-        """
-        universal work log save
+        """Universal work log save
+
         :param log_path:    log save path
         :param log_content: log save content
         :return:            none
@@ -108,8 +108,8 @@ class Matrix:
         print(dataload.SHELLHEAD + log_content, file=logFile)        # write into file
 
     def mkworkdir(self, log_path, folder):
-        """
-        create a crawler work directory
+        """Create a crawler work directory
+
         :param self:    self class
         :param log_path: log save path
         :param folder:  folder create path
@@ -132,8 +132,9 @@ class Matrix:
         return folder
 
     def _getproxyserver(self, log_path):
-        """
-        catch a proxy server when crwaler crawl many times website forbidden host ip
+        """Catch a proxy server
+
+        when crwaler crawl many times website forbidden host ip
         :param log_path: log save path
         :return:        proxy server, add to opener
         """
@@ -170,9 +171,10 @@ class Matrix:
         return proxy_server
 
     def _gatherpostkey(self, log_path):
-        """
-        POST way login need post-key
-        :return:    post way request data
+        """POST way login need post-key
+
+        :param log_path:    log save path
+        :return:            post way request data
         """
         global login_data_l
         login_data_l = self._login_infopreload(dataload.LOGINCR_PATH)
@@ -210,8 +212,8 @@ class Matrix:
         return post_data
 
     def camouflage_login(self, log_path):
-        """
-        camouflage browser to login
+        """Camouflage browser to login
+
         :param log_path: log save path
         :return:        none
         """
@@ -228,8 +230,8 @@ class Matrix:
         self.logprowork(log_path, log_context)
 
     def save_test_html(self, workdir, content, log_path):
-        """
-        save request web source page in a html file, test use
+        """Save request web source page in a html file, test use
+
         :param workdir:     work directory
         :param content:     save content
         :param log_path:    log save path
@@ -243,8 +245,8 @@ class Matrix:
 
     @staticmethod
     def data_sizer(whole_pattern, info_pattern, web_src):
-        """
-        a sizer for all of imags in a pages
+        """A sizer for all of imags in a pages
+
         :param whole_pattern:   whole info data regex compile pattern
         :param info_pattern:    image info regex compile pattern
         :param web_src:         webpage source
@@ -290,9 +292,9 @@ class Matrix:
 
     @retry
     def _save_oneimage(self, index, url, basepages, img_savepath, log_path):
-        """
-        download one target image, then multi-process will call here
-        add retry decorator, if first try failed, it will auto-retry
+        """Download one target image, then multi-process will call here
+
+        Add retry decorator, if first try failed, it will auto-retry
         :param index:           image index
         :param url:             image urls list
         :param basepages:       referer basic pages list
@@ -372,14 +374,15 @@ class Matrix:
             self.logprowork(log_path, log_context)
 
     class _MultiThreading(threading.Thread):
-        """
-        overrides its run method by inheriting the Thread class
-        this class can be placed outside the main class, you can also put inside
-        threads are the smallest unit of program execution flow that is less burdensome than process creation
+        """Overrides its run method by inheriting the Thread class
+
+        This class can be placed outside the main class, you can also put inside
+        Threads are the smallest unit of program execution flow that is less burdensome than process creation
+        Internal call
         """
         def __init__(self, lock, i, img_url, basepages, img_savepath, log_path):
-            """
-            commit class arguments
+            """Provide class arguments
+
             :param lock:            object lock
             :param i:               image index
             :param img_url:         image url
@@ -398,8 +401,8 @@ class Matrix:
             self.logPath = log_path
 
         def run(self):
-            """
-            overwrite threading.thread run() method
+            """Overwrite threading.thread run() method
+
             :return:    none
             """
             # cancel lock release will let multi-process change to easy process
@@ -408,9 +411,8 @@ class Matrix:
             ## self.lock.release()
 
     def download_alltarget(self, urls, basepages, workdir, log_path):
-        """
-        multi-process download all image
-        test speed: daily-rank top 50 whole crawl elapsed time 1min
+        """Multi-process download all image
+
         :param urls:        all original images urls
         :param basepages:   all referer basic pages
         :param workdir:     work directory
@@ -431,7 +433,7 @@ class Matrix:
             sub_thread = self._MultiThreading(lock, i, img_url, basepages, workdir, log_path)
             sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
             sub_thread.start()                                      # start download
-            time.sleep(0.1)                                         # confirm thread has been created, delay cannot too long
+            ## time.sleep(0.1)                                         # confirm thread has been created, delay cannot too long
         # parent thread wait all sub-thread end
         while aliveThreadCnt > 1:                                   # finally only parent process
             _ALIVE_GLOBAL = threading.active_count()                # global variable update
@@ -449,8 +451,8 @@ class Matrix:
         self.logprowork(log_path, log_context)
 
     def htmlpreview_build(self, workdir, html_path, log_path):
-        """
-        build a html file to browse image
+        """Build a html file to browse image
+
         :param self:        class self
         :param workdir:     work directory
         :param html_path:   html file save path
@@ -486,9 +488,9 @@ class Matrix:
         self.logprowork(log_path, log_context)
 
     def work_finished(self, log_path):
-        """
-        work finished log
-        :param log_path:     log save path
+        """Work finished log
+
+        :param log_path:    log save path
         :return:            none
         """
         # end time log

@@ -11,7 +11,7 @@ PROJECT_NAME        = 'MatPixivCrawler3'
 DEVELOPER           = 'Neod Anderjon(LeaderN)'                      # author signature
 LABORATORY          = 'T.WKVER'                                     # lab
 ORGANIZATION        = '</MATRIX>'
-VERSION             = 'v1p6_LTE'
+VERSION             = 'v1p7_LTE'
 
 # define some global variable
 SHELLHEAD = PROJECT_NAME + '@' + ORGANIZATION + ':~$ '              # copy linux head symbol
@@ -23,9 +23,9 @@ SHELLPRINT = lambda str_:print(SHELLHEAD + str_)                    # print with
 # work directory
 storage_l = []
 def platform_setting():
-    """
-    set os platform to set folder format
-    folder must with directory symbol '/' or '\\'
+    """Set os platform to set folder format
+
+    Folder must with directory symbol '/' or '\\'
     :return:    platform work directory
     """
     # call global variables
@@ -122,8 +122,8 @@ _HEADERS_CONTENT_TYPE = "application/x-www-form-urlencoded; charset=UTF-8"
 _HEADERS_XMLHTTPREQUEST = "XMLHttpRequest"
 
 def dict_transto_list (input_dict):
-    """
-    change dict data-type to list
+    """Change dict data-type to list
+
     :param input_dict:      dict
     :return:                list
     """
@@ -135,8 +135,8 @@ def dict_transto_list (input_dict):
     return result_list
 
 def uc_user_agent():
-    """
-    choose platform user-agent headers
+    """Choose platform user-agent headers
+
     :return:    headers
     """
     # build dict word
@@ -154,8 +154,8 @@ def uc_user_agent():
     return headers
 
 def build_login_headers(cookie):
-    """
-    build the first request login headers
+    """Build the first request login headers
+
     :param cookie:  cookie
     :return:        login headers
     """
@@ -181,8 +181,8 @@ def build_login_headers(cookie):
     return build_headers
 
 def build_original_headers(referer):
-    """
-    original image request headers
+    """Original image request headers
+
     :param referer: headers need a last page referer
     :return:        build headers
     """

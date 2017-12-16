@@ -1,6 +1,6 @@
 [![Python 3.6](https://img.shields.io/badge/Python-3.6-yellow.svg)](http://www.python.org/download/)
 
-# MatPixivCrawler3 - a \</MATRIX> Pixiv website crawler with python3
+# MatPixivCrawler3 - A \</MATRIX> Pixiv website crawler with python3
     
     ███╗   ███╗ █████╗ ████████╗██████╗ ██╗██╗  ██╗██╗██╗   ██╗ ██████╗██████╗  █████╗ ██╗    ██╗██╗     ███████╗██████╗ ██████╗ 
     ████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗██║╚██╗██╔╝██║██║   ██║██╔════╝██╔══██╗██╔══██╗██║    ██║██║     ██╔════╝██╔══██╗╚════██╗
@@ -9,7 +9,7 @@
     ██║ ╚═╝ ██║██║  ██║   ██║   ██║     ██║██╔╝ ██╗██║ ╚████╔╝ ╚██████╗██║  ██║██║  ██║╚███╔███╔╝███████╗███████╗██║  ██║██████╔╝
     ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝ 
 
-ascii artword from http://patorjk.com/software/taag/ font: ANSI Shadow
+ASCII artword from http://patorjk.com/software/taag/ font: ANSI Shadow
 
 License
 ======
@@ -22,8 +22,8 @@ License
 Update
 ======
 
-    Version: v1p6_LTE
-    Last Update Time: 20171216pm1928
+    Version: v1p7_LTE
+    Last Update Time: 20171216pm2010
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 

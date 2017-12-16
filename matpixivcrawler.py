@@ -10,6 +10,10 @@ from modeoption import RankingTop as rtn
 from modeoption import RepertoAll as ira
 
 def main():
+    """main() fuction
+
+    :return:    none
+    """
     print(Matrix.__doc__)
 
     mode = dataload.SHELLINPUT('select mode: ')
