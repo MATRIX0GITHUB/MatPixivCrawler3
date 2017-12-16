@@ -4,22 +4,23 @@
 # =====================================================================
 # this python script is built to add a example to call class lib
 
-import dataload                                                     # storage data and strings
-import privmatrix                                                   # private crawler library
-from modeoption import RankingTop, ReposAll
+import dataload
+from privmatrix import Matrix
+from modeoption import RankingTop as rtn
+from modeoption import RepertoAll as ira
 
 def main():
-    print(privmatrix.Matrix().__doc__)
+    print(Matrix.__doc__)
 
     mode = input(dataload.SHELLHEAD + 'select mode: ')
     if mode == 'rtn' or mode == '1':
-        buildTask = RankingTop(dataload.rankdir, dataload.logpath, dataload.htmlpath)
-        buildTask.start()
+        build_task = rtn(dataload.RANK_DIR, dataload.LOG_PATH, dataload.HTML_PATH)
+        build_task.start()
     elif mode == 'ira' or mode == '2':
-        buildTask = ReposAll(dataload.repodir, dataload.logname, dataload.htmlname)
-        buildTask.start()
+        build_task = ira(dataload.REPO_DIR, dataload.LOG_NAME, dataload.HTML_NAME)
+        build_task.start()
     elif mode == 'help' or mode == '3':
-        print(privmatrix.Matrix().__doc__)
+        print(Matrix.__doc__)
     else:
         print(dataload.SHELLHEAD + "argv(s) error\n")
 
