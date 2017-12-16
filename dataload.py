@@ -4,27 +4,24 @@
 # =====================================================================
 # this test script is written to handle datas and some info
 
+import time, os
+
 # projrct info
 PROJECT_NAME        = 'MatPixivCrawler3'
 DEVELOPER           = 'Neod Anderjon(LeaderN)'                      # author signature
 LABORATORY          = 'T.WKVER'                                     # lab
 ORGANIZATION        = '</MATRIX>'
-VERSION             = 'v1p5_LTE'
-
-import urllib.request, urllib.parse, urllib.error
-import time, os, linecache
-import getpass
+VERSION             = 'v1p6_LTE'
 
 # define some global variable
 SHELLHEAD = PROJECT_NAME + '@' + ORGANIZATION + ':~$ '              # copy linux head symbol
-# work directory
-storage_l = []
-# login datas
-login_data_l = []
+SHELLINPUT = lambda str_:input(SHELLHEAD + str_)                    # input print string
+SHELLPRINT = lambda str_:print(SHELLHEAD + str_)                    # print with shell-head
 
 # ======================get format time, and get year-month-date to be a folder name===============================
-# work directory
 
+# work directory
+storage_l = []
 def platform_setting():
     """
     set os platform to set folder format
@@ -58,6 +55,7 @@ _rtc = time.localtime()
 _ymd = '%d-%d-%d' % (_rtc[0], _rtc[1], _rtc[2])
 
 # universal path
+LOGINCR_PATH = os.getcwd() + storage_l[1] + 'login.cr'
 LOG_NAME = storage_l[1] + 'CrawlerWork[%s].log' % _ymd
 HTML_NAME = storage_l[1] + 'CrawlerWork[%s].html' % _ymd
 RANK_DIR = storage_l[0] + 'rankingtop_%s%s' % (_ymd, storage_l[1])
@@ -66,59 +64,6 @@ LOG_PATH = RANK_DIR + LOG_NAME
 HTML_PATH = RANK_DIR + HTML_NAME
 # illustrepo use path
 REPO_DIR = storage_l[0]
-
-# ==============================================pixiv login info====================================================
-
-def login_infopreload():
-    """
-    get user input username and password
-    login.cr file example:
-    =================================
-    [login]
-    <mail>
-    <passwd>
-    =================================
-    :return:    username, password, get data
-    """
-    global login_data_l
-    print("###################################login data check###################################")
-    login_file_path = os.getcwd() + storage_l[1] + 'login.cr'           # get local dir path
-    is_login_file_existed = os.path.exists(login_file_path)
-    if is_login_file_existed:
-        user_mailbox = linecache.getline(login_file_path, 2)           # row 2, usernamemail
-        user_password = linecache.getline(login_file_path, 3)          # row 3, password
-        # empty file
-        if user_mailbox == '' or user_password == '':
-            print(SHELLHEAD + "login.cr file invaild, please input your login info")
-            user_mailbox = input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
-            user_password = getpass.getpass(SHELLHEAD + 'enter your account password: ') # pycharm python console not support
-        else:
-            check = input(SHELLHEAD + "please check your info:\n"
-                                          "[!]    username: %s[!]    password: %s"
-                                          "Yes or No?: " % (user_mailbox, user_password))
-            # user judge info are error
-            if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
-                print(SHELLHEAD + "you can write new info")
-                user_mailbox = input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
-                user_password = getpass.getpass(SHELLHEAD + 'enter your account password: ')
-            else:
-                pass
-    # no login.cr file
-    else:
-        print(SHELLHEAD + "cannot find login.cr file, please input your login info")
-        user_mailbox = input(SHELLHEAD + 'enter your pixiv id(mailbox), must be a R18: ')
-        user_password = getpass.getpass(SHELLHEAD + 'enter your account password: ')
-
-    # strip() delete symbol '\n'
-    username = user_mailbox.strip()
-    passwd = user_password.strip()
-
-    getway_reg_info = [('user', username), ('pass', passwd)]
-    getway_data = urllib.parse.urlencode(getway_reg_info).encode(encoding='UTF8')
-
-    # save in a list
-    login_data_l = [username, passwd, getway_data]
-login_infopreload()
 
 # ========================================some use url address=====================================================
 # login request must be https proxy format, request page or image must be http proxy

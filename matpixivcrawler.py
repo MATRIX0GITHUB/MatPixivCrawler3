@@ -12,7 +12,7 @@ from modeoption import RepertoAll as ira
 def main():
     print(Matrix.__doc__)
 
-    mode = input(dataload.SHELLHEAD + 'select mode: ')
+    mode = dataload.SHELLINPUT('select mode: ')
     if mode == 'rtn' or mode == '1':
         build_task = rtn(dataload.RANK_DIR, dataload.LOG_PATH, dataload.HTML_PATH)
         build_task.start()
@@ -22,7 +22,7 @@ def main():
     elif mode == 'help' or mode == '3':
         print(Matrix.__doc__)
     else:
-        print(dataload.SHELLHEAD + "argv(s) error\n")
+        dataload.SHELLPRINT("argv(s) error\n")
 
 if __name__ == '__main__':
     main()

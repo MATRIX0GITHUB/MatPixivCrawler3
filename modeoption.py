@@ -36,20 +36,16 @@ class RankingTop(object):
         img_cnt = 0
         if ormode == 'o' or ormode == '1':
             # input a string for request image number
-            img_cnt = int(input(dataload.SHELLHEAD +
-                        'gather whole ordinary vaild target %d, enter you want: ' % whole_nbr))
+            img_cnt = int(dataload.SHELLINPUT('gather whole ordinary vaild target %d, enter you want: ' % whole_nbr))
             while img_cnt > whole_nbr:
-                print(dataload.SHELLHEAD + 'input error, rank top at most %d' % whole_nbr)
-                img_cnt = int(input(dataload.SHELLHEAD +
-                        'enter again(max is %d): ' % whole_nbr))
+                dataload.SHELLPRINT('input error, rank top at most %d' % whole_nbr)
+                img_cnt = int(dataload.SHELLINPUT('enter again(max is %d): ' % whole_nbr))
         elif ormode == 'r' or ormode == '2':
             # input a string for request image number
-            img_cnt = int(input(dataload.SHELLHEAD +
-                        'gather whole R18 vaild target %d, enter you want: ' % whole_nbr))
+            img_cnt = int(dataload.SHELLINPUT('gather whole R18 vaild target %d, enter you want: ' % whole_nbr))
             while img_cnt > whole_nbr:
-                print(dataload.SHELLHEAD + 'input error, rank R18 top at most %d' % whole_nbr)
-                img_cnt = int(input(dataload.SHELLHEAD +
-                        'enter again(max is %d): ' % whole_nbr))
+                dataload.SHELLPRINT('input error, rank R18 top at most %d' % whole_nbr)
+                img_cnt = int(dataload.SHELLINPUT('enter again(max is %d): ' % whole_nbr))
         else:
             pass
 
@@ -66,9 +62,9 @@ class RankingTop(object):
         pvmx.logprowork(log_path, log_context)
         rank_word = None
         req_url = None
-        ormode = input(dataload.SHELLHEAD + 'select ranking type, ordinary(o|1) or r18(r|2): ')
+        ormode = dataload.SHELLINPUT('select ranking type, ordinary(o|1) or r18(r|2): ')
         if ormode == 'o' or ormode == '1':
-            dwm = input(dataload.SHELLHEAD + 'select daily(1)|weekly(2)|monthly(3) ordinary ranking type: ')
+            dwm = dataload.SHELLINPUT('select daily(1)|weekly(2)|monthly(3) ordinary ranking type: ')
             if dwm == '1':
                 req_url = dataload.DAILY_RANKING_URL
                 rank_word = dataload.DAILY_WORD
@@ -79,10 +75,10 @@ class RankingTop(object):
                 req_url = dataload.MONTHLY_RANKING_URL
                 rank_word = dataload.MONTHLY_WORD
             else:
-                print(dataload.SHELLHEAD + "argv(s) error\n")
+                dataload.SHELLPRINT("argv(s) error\n")
             log_context = 'crawler set target to %s rank top' % rank_word
         elif ormode == 'r' or ormode == '2':
-            dwm = input(dataload.SHELLHEAD + 'select daily(1)/weekly(2) R18 ranking type: ')
+            dwm = dataload.SHELLINPUT('select daily(1)/weekly(2) R18 ranking type: ')
             if dwm == '1':
                 req_url = dataload.DAILY_RANKING_R18_URL
                 rank_word = dataload.DAILY_WORD
@@ -90,10 +86,10 @@ class RankingTop(object):
                 req_url = dataload.WEEKLY_RANKING_R18_URL
                 rank_word = dataload.WEEKLY_WORD
             else:
-                print(dataload.SHELLHEAD + "argv(s) error\n")
+                dataload.SHELLPRINT("argv(s) error\n")
             log_context = 'crawler set target to %s r18 rank top' % rank_word
         else:
-            print(dataload.SHELLHEAD + "argv(s) error\n")
+            dataload.SHELLPRINT("argv(s) error\n")
             log_context = None
         pvmx.logprowork(log_path, log_context)
 
@@ -110,7 +106,7 @@ class RankingTop(object):
         page_url = option[0]
         ormode = option[1]
         response = pvmx.opener.open(fullurl=page_url,
-                                    data=pvmx.getway_data,
+                                    data=privmatrix.login_data_l[2],
                                     timeout=30)
         if response.getcode() == dataload.HTTP_OK_CODE_200:
             log_context = 'website response successed'
@@ -138,7 +134,7 @@ class RankingTop(object):
             pvmx.logprowork(log_path, log_context)
             basepages.append(dataload.BASEPAGE_URL + i[4])          # every picture url address: base_url address + picture_id
 
-        return target_urls, basepages
+        return target_urls[:img_nbr], basepages                     # only return need count
 
     def start(self):
         """
@@ -166,8 +162,8 @@ class RepertoAll(object):
         :param log_name:    log name
         :param html_name:   html name
         """
-        target_id = input(dataload.SHELLHEAD
-                    + 'target crawl illustrator pixiv-id: ')
+        target_id = dataload.SHELLINPUT(
+                    'target crawl illustrator pixiv-id: ')
         self.user_input_id = target_id
         self.workdir = workdir + 'illustrepo_' + self.user_input_id
         self.logpath = self.workdir + log_name
@@ -183,7 +179,7 @@ class RepertoAll(object):
         # get illust artwork whole count mainpage url
         cnt_url = dataload.MEMBER_ILLUST_URL + illust_id
         response = pvmx.opener.open(fullurl=cnt_url,
-                                    data=pvmx.getway_data,
+                                    data=privmatrix.login_data_l[2],
                                     timeout=30)
         web_src = response.read().decode("UTF-8", "ignore")
 
@@ -193,7 +189,7 @@ class RepertoAll(object):
         # if login failed, this step will raise an error
         arthor_name = None
         if len(arthor_names) == 0:
-            print(dataload.SHELLHEAD + "login failed, please check method call")
+            dataload.SHELLPRINT("login failed, please check method call")
             exit()
         else:
             arthor_name = arthor_names[0]
@@ -227,7 +223,7 @@ class RepertoAll(object):
         else:
             urlTarget = step1url + dataload.PAGE_NUM_WORD + str(array)
         response = pvmx.opener.open(fullurl=urlTarget,
-                                    data=pvmx.getway_data,
+                                    data=privmatrix.login_data_l[2],
                                     timeout=30)
         if response.getcode() == dataload.HTTP_OK_CODE_200:
             log_context = "mainpage %d response successed" % array
@@ -241,13 +237,11 @@ class RepertoAll(object):
         imgitem_pattern = re.compile(dataload.IMAGEITEM_REGEX, re.S)
         image_name_pattern = re.compile(dataload.IMAGE_NAME_REGEX, re.S)
         sizer_result = pvmx.data_sizer(imgitem_pattern, image_name_pattern, web_src)
-        target_urls = sizer_result[0]
-        image_names = sizer_result[1]
 
         log_context = "mainpage %d data gather finished" % array
         pvmx.logprowork(log_path, log_context)
 
-        return target_urls, image_names
+        return sizer_result                                         # output target urls and image names
 
     def crawl_allpage_target(self, illust_id, nbr, arthor_name, log_path):
         """
@@ -276,12 +270,12 @@ class RepertoAll(object):
         alive_targetcnt = len(all_targeturls)
 
         # input want image count
-        nbr_capture = int(input(dataload.SHELLHEAD
-                + 'gather all repo %d, whole target(s): %d, enter you want count: ' % (nbr, alive_targetcnt)))
+        nbr_capture = int(dataload.SHELLINPUT(
+                'gather all repo %d, whole target(s): %d, enter you want count: ' % (nbr, alive_targetcnt)))
         # count error
         while (nbr_capture > alive_targetcnt) or (nbr_capture <= 0):
-            nbr_capture = int(input(dataload.SHELLHEAD
-                + 'error, input count must <= %d and not 0: ' % alive_targetcnt))
+            nbr_capture = int(dataload.SHELLINPUT(
+                'error, input count must <= %d and not 0: ' % alive_targetcnt))
         log_context = "check crawl illustrator id:" + self.user_input_id + " image(s):%d" % nbr_capture
         pvmx.logprowork(log_path, log_context)
 

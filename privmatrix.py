@@ -9,12 +9,14 @@ from retrying import retry
 import threading
 from PIL import Image
 from collections import OrderedDict
-import time, random, re, os
+import time, random, re, os, getpass, linecache
 import dataload
 
 # global var init value
+login_data_l = []
 _PROXY_HASRUN_FLAG = False
 _DOWNLOAD_POOL = 0
+_ALIVE_GLOBAL = 0
 
 class Matrix:
     """
@@ -27,7 +29,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.5.0 LTE                                                                                                             #
+    #    Version: 1.6.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -38,24 +40,72 @@ class Matrix:
     def __init__(self):
         # from first login save cookie and create global opener
         # call this opener must write parameter name
-        self.getway_data = dataload.login_data_l[2]                        # request images and pages GET way
         self.cookie = http.cookiejar.LWPCookieJar()                 # create a cookie words
         self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie) # add http cookie words
         self.opener = urllib.request.build_opener(self.cookieHandler) # build the opener
         urllib.request.install_opener(self.opener)                  # install it
 
     @staticmethod
-    def logprowork(logpath, logcontent):
+    def _login_infopreload(logincr_path):
+        """
+        get user input username and password
+        login.cr file example:
+        =================================
+        [login]
+        <mail>
+        <passwd>
+        =================================
+        :param login_file_path:
+        :return:    username, password, get data
+        """
+        is_login_file_existed = os.path.exists(logincr_path)
+        if is_login_file_existed:
+            user_mailbox = linecache.getline(logincr_path, 2)  # row 2, usernamemail
+            user_password = linecache.getline(logincr_path, 3)  # row 3, password
+            # empty file
+            if user_mailbox == '' or user_password == '':
+                dataload.SHELLPRINT("login.cr file invaild, please input your login info")
+                user_mailbox = dataload.SHELLINPUT('enter your pixiv id(mailbox), must be a R18: ')
+                user_password = getpass.getpass(
+                    dataload.SHELLHEAD + 'enter your account password: ')  # pycharm python console not support
+            else:
+                check = dataload.SHELLINPUT("please check your info:\n"
+                                            "[!]    username: %s[!]    password: %s"
+                                            "Yes or No?: " % (user_mailbox, user_password))
+                # user judge info are error
+                if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
+                    dataload.SHELLPRINT("you can write new info")
+                    user_mailbox = dataload.SHELLINPUT('enter your pixiv id(mailbox), must be a R18: ')
+                    user_password = getpass.getpass(dataload.SHELLHEAD + 'enter your account password: ')
+                else:
+                    pass
+        # no login.cr file
+        else:
+            dataload.SHELLPRINT("cannot find login.cr file, please input your login info")
+            user_mailbox = dataload.SHELLINPUT('enter your pixiv id(mailbox), must be a R18: ')
+            user_password = getpass.getpass(dataload.SHELLHEAD + 'enter your account password: ')
+
+        # strip() delete symbol '\n'
+        username = user_mailbox.strip()
+        passwd = user_password.strip()
+
+        getway_reg_info = [('user', username), ('pass', passwd)]
+        getway_data = urllib.parse.urlencode(getway_reg_info).encode(encoding='UTF8')
+
+        return username, passwd, getway_data
+
+    @staticmethod
+    def logprowork(log_path, log_content):
         """
         universal work log save
-        :param logpath:     log save path
-        :param logcontent: log save content
+        :param log_path:    log save path
+        :param log_content: log save content
         :return:            none
         """
         # this log file must be a new file
-        logFile = open(logpath, 'a+', encoding='utf-8')             # add context to file option 'a+'
-        print(dataload.SHELLHEAD + logcontent)
-        print(dataload.SHELLHEAD + logcontent, file=logFile)        # write into file
+        logFile = open(log_path, 'a+', encoding='utf-8')             # add context to file option 'a+'
+        dataload.SHELLPRINT(log_content)
+        print(dataload.SHELLHEAD + log_content, file=logFile)        # write into file
 
     def mkworkdir(self, log_path, folder):
         """
@@ -124,6 +174,8 @@ class Matrix:
         POST way login need post-key
         :return:    post way request data
         """
+        global login_data_l
+        login_data_l = self._login_infopreload(dataload.LOGINCR_PATH)
         # request a post key
         response = self.opener.open(dataload.LOGIN_POSTKEY_URL, timeout=30)
         if response.getcode() == dataload.HTTP_OK_CODE_200:
@@ -144,8 +196,8 @@ class Matrix:
 
         # build basic dict
         post_tabledict = OrderedDict()                              # this post data must has a order
-        post_tabledict['pixiv_id'] = dataload.login_data_l[0]
-        post_tabledict['password'] = dataload.login_data_l[1]
+        post_tabledict['pixiv_id'] = login_data_l[0]
+        post_tabledict['password'] = login_data_l[1]
         post_tabledict['captcha'] = ""
         post_tabledict['g_recaptcha_response'] = ""
         post_tabledict['post_key'] = post_key
@@ -313,12 +365,10 @@ class Matrix:
             img_bindata = response.read()
             source_size = float(len(img_bindata) / 1024)            # get image size
             _DOWNLOAD_POOL += source_size                            # calcus download source whole size
-            log_context = 'capture target no.%d image ok, image size: %dKB' % (index + 1, source_size)
-            self.logprowork(log_path, log_context)
             # this step will delay much time
             with open(img_savepath + dataload.storage_l[1] + image_name + '.' + img_datatype, 'wb') as img:
                 img.write(img_bindata)
-            log_context = 'download no.%d image finished' % (index + 1)
+            log_context = 'target no.%d image download finished, image size: %dKB' % (index + 1, source_size)
             self.logprowork(log_path, log_context)
 
     class _MultiThreading(threading.Thread):
@@ -368,12 +418,12 @@ class Matrix:
         :return:            none
         """
         global _DOWNLOAD_POOL
+        global _ALIVE_GLOBAL
         queueLength = len(urls)
         log_context = 'start to download %d target(s)======>' % queueLength
         self.logprowork(log_path, log_context)
 
         lock = threading.Lock()                                     # object lock
-        sub_thread = None
         aliveThreadCnt = queueLength                                # init value
         starttime = time.time()                                     # log download elapsed time
         for i, img_url in enumerate(urls):
@@ -384,11 +434,12 @@ class Matrix:
             time.sleep(0.1)                                         # confirm thread has been created, delay cannot too long
         # parent thread wait all sub-thread end
         while aliveThreadCnt > 1:                                   # finally only parent process
-            sub_thread.join()                                       # parent thread wait sub-threads over
-            time.sleep(3)
-            aliveThreadCnt = threading.active_count()
-            log_context = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
-            self.logprowork(log_path, log_context)
+            _ALIVE_GLOBAL = threading.active_count()                # global variable update
+            # when alive thread count change, print its value
+            if aliveThreadCnt != _ALIVE_GLOBAL:
+                log_context = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
+                self.logprowork(log_path, log_context)
+                aliveThreadCnt = _ALIVE_GLOBAL                      # after print update value
         # calcus average download speed and whole elapesd time
         endtime = time.time()
         elapesd_time = endtime - starttime
