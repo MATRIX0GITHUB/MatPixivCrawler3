@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
-# this python script is built to provide modes for crawler
+# this python script is built to provide modes for crawler frame
 
 import re
 import dataload, privmatrix
@@ -38,23 +38,23 @@ class RankingTop(object):
         img_cnt = 0
         if ormode == 'o' or ormode == '1':
             # input a string for request image number
-            img_cnt = int(dataload.SHELLINPUT(
+            img_cnt = int(dataload.SBH_INPUT(
                 'gather whole ordinary vaild target %d, enter you want: '
                 % whole_nbr))
             while img_cnt > whole_nbr:
-                dataload.SHELLPRINT(
+                dataload.SBH_PRINT(
                     'input error, rank top at most %d' % whole_nbr)
-                img_cnt = int(dataload.SHELLINPUT(
+                img_cnt = int(dataload.SBH_INPUT(
                     'enter again(max is %d): ' % whole_nbr))
         elif ormode == 'r' or ormode == '2':
             # input a string for request image number
-            img_cnt = int(dataload.SHELLINPUT(
+            img_cnt = int(dataload.SBH_INPUT(
                 'gather whole R18 vaild target %d, enter you want: '
                 % whole_nbr))
             while img_cnt > whole_nbr:
-                dataload.SHELLPRINT(
+                dataload.SBH_PRINT(
                     'input error, rank R18 top at most %d' % whole_nbr)
-                img_cnt = int(dataload.SHELLINPUT(
+                img_cnt = int(dataload.SBH_INPUT(
                     'enter again(max is %d): ' % whole_nbr))
         else:
             pass
@@ -72,10 +72,10 @@ class RankingTop(object):
         _pvmx.logprowork(log_path, log_context)
         rank_word = None
         req_url = None
-        ormode = dataload.SHELLINPUT(
+        ormode = dataload.SBH_INPUT(
             'select ranking type, ordinary(o|1) or r18(r|2): ')
         if ormode == 'o' or ormode == '1':
-            dwm = dataload.SHELLINPUT(
+            dwm = dataload.SBH_INPUT(
                 'select daily(1)|weekly(2)|monthly(3) ordinary ranking type: ')
             if dwm == '1':
                 req_url = dataload.DAILY_RANKING_URL
@@ -87,10 +87,10 @@ class RankingTop(object):
                 req_url = dataload.MONTHLY_RANKING_URL
                 rank_word = dataload.MONTHLY_WORD
             else:
-                dataload.SHELLPRINT("argv(s) error\n")
+                dataload.SBH_PRINT("argv(s) error\n")
             log_context = 'crawler set target to %s rank top' % rank_word
         elif ormode == 'r' or ormode == '2':
-            dwm = dataload.SHELLINPUT(
+            dwm = dataload.SBH_INPUT(
                 'select daily(1)/weekly(2) R18 ranking type: ')
             if dwm == '1':
                 req_url = dataload.DAILY_RANKING_R18_URL
@@ -99,11 +99,11 @@ class RankingTop(object):
                 req_url = dataload.WEEKLY_RANKING_R18_URL
                 rank_word = dataload.WEEKLY_WORD
             else:
-                dataload.SHELLPRINT(
+                dataload.SBH_PRINT(
                     "argv(s) error\n")
             log_context = 'crawler set target to %s r18 rank top' % rank_word
         else:
-            dataload.SHELLPRINT(
+            dataload.SBH_PRINT(
                 "argv(s) error\n")
             log_context = None
         _pvmx.logprowork(log_path, log_context)
@@ -194,7 +194,7 @@ class RepertoAll(object):
         :param log_name:    log name
         :param html_name:   html name
         """
-        target_id = dataload.SHELLINPUT(
+        target_id = dataload.SBH_INPUT(
                     'target crawl illustrator pixiv-id: ')
         self.user_input_id = target_id
         self.workdir = workdir + 'illustrepo_' + self.user_input_id
@@ -221,7 +221,7 @@ class RepertoAll(object):
         # if login failed, this step will raise an error
         arthor_name = None
         if len(arthor_names) == 0:
-            dataload.SHELLPRINT("login failed, please check method call")
+            dataload.SBH_PRINT("login failed, please check method call")
             exit()
         else:
             arthor_name = arthor_names[0]
@@ -310,10 +310,10 @@ class RepertoAll(object):
         log_context = ("gather all repo %d, whole target(s): %d"
                        % (nbr, alive_targetcnt))
         _pvmx.logprowork(log_path, log_context)
-        nbr_capture = int(dataload.SHELLINPUT(
+        nbr_capture = int(dataload.SBH_INPUT(
                 'enter you want count: '))
         while (nbr_capture > alive_targetcnt) or (nbr_capture <= 0):
-            nbr_capture = int(dataload.SHELLINPUT(
+            nbr_capture = int(dataload.SBH_INPUT(
                 'error, input count must <= %d and not 0: ' % alive_targetcnt))
         log_context = ("check crawl illustrator id:" + self.user_input_id +
                       " image(s):%d" % nbr_capture)

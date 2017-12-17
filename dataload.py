@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
-# this test script is written to handle datas and some info
+# this test script is written to list all use info
 
 import time, os
 
@@ -14,9 +14,9 @@ ORGANIZATION        = '</MATRIX>'
 VERSION             = 'v1p8_LTE'
 
 # define some global variable
-SHELLHEAD = PROJECT_NAME + '@' + ORGANIZATION + ':~$ '
-SHELLINPUT = lambda str_:input(SHELLHEAD + str_)
-SHELLPRINT = lambda str_:print(SHELLHEAD + str_)
+SHELL_BASHHEAD = PROJECT_NAME + '@' + ORGANIZATION + ':~$ '
+SBH_INPUT = lambda str_:input(SHELL_BASHHEAD + str_)
+SBH_PRINT = lambda str_:print(SHELL_BASHHEAD + str_)
 
 def platform_setting():
     """Set os platform to set folder format

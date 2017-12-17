@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
-# this python script is built to create a private library use in this crawler
+# this python script is built to collect all use lib into a class
 
 import urllib.request, urllib.parse, urllib.error, http.cookiejar
 from retrying import retry
@@ -65,15 +65,15 @@ class Matrix:
             user_password = linecache.getline(logincr_path, 3)
             # empty file
             if user_mailbox == '' or user_password == '':
-                dataload.SHELLPRINT(
+                dataload.SBH_PRINT(
                     "login.cr file invaild, please input your login info")
-                user_mailbox = dataload.SHELLINPUT(
+                user_mailbox = dataload.SBH_INPUT(
                     'enter your pixiv id(mailbox), must be a R18: ')
                 # pycharm python console not support getpass input
                 user_password = getpass.getpass(
-                    dataload.SHELLHEAD + 'enter your account password: ')
+                    dataload.SHELL_BASHHEAD + 'enter your account password: ')
             else:
-                check = dataload.SHELLINPUT(
+                check = dataload.SBH_INPUT(
                     "please check your info:\n"
                     "[!]    username: %s[!]    password: %s"
                     "Yes or No?: "
@@ -81,22 +81,22 @@ class Matrix:
                 # user judge info are error
                 if (check != 'yes' and check != 'Yes'
                     and check != 'YES' and check != 'y' and check != 'Y'):
-                    dataload.SHELLPRINT(
+                    dataload.SBH_PRINT(
                         "you can write new info")
-                    user_mailbox = dataload.SHELLINPUT(
+                    user_mailbox = dataload.SBH_INPUT(
                         'enter your pixiv id(mailbox), must be a R18: ')
                     user_password = getpass.getpass(
-                        dataload.SHELLHEAD + 'enter your account password: ')
+                        dataload.SHELL_BASHHEAD + 'enter your account password: ')
                 else:
                     pass
         # no login.cr file
         else:
-            dataload.SHELLPRINT(
+            dataload.SBH_PRINT(
                 "cannot find login.cr file, please input your login info")
-            user_mailbox = dataload.SHELLINPUT(
+            user_mailbox = dataload.SBH_INPUT(
                 'enter your pixiv id(mailbox), must be a R18: ')
             user_password = getpass.getpass(
-                dataload.SHELLHEAD + 'enter your account password: ')
+                dataload.SHELL_BASHHEAD + 'enter your account password: ')
 
         # strip() delete symbol '\n'
         username = user_mailbox.strip()
@@ -119,8 +119,8 @@ class Matrix:
         """
         # add context to file option 'a+'
         logFile = open(log_path, 'a+', encoding='utf-8')
-        dataload.SHELLPRINT(log_content)
-        print(dataload.SHELLHEAD + log_content, file=logFile)
+        dataload.SBH_PRINT(log_content)
+        print(dataload.SHELL_BASHHEAD + log_content, file=logFile)
 
     def mkworkdir(self, log_path, folder):
         """Create a crawler work directory
@@ -131,7 +131,7 @@ class Matrix:
         :return:        folder create path
         """
         # create a folder to save picture
-        dataload.SHELLPRINT(
+        dataload.SBH_PRINT(
             'crawler work directory setting: ' + folder)
         is_folder_existed = os.path.exists(folder)
         if not is_folder_existed:
@@ -227,24 +227,24 @@ class Matrix:
         # mate post key
         web_src = response.read().decode("UTF-8", "ignore")
         post_pattern = re.compile(dataload.POSTKEY_REGEX, re.S)
-        post_key = re.findall(post_pattern, web_src)[0]
-        log_context = 'get post-key: ' + post_key
+        postkey = re.findall(post_pattern, web_src)[0]
+        log_context = 'get post-key: ' + postkey
         self.logprowork(log_path, log_context)
 
         # build post-way data order dict
-        post_tabledict = OrderedDict()
-        post_tabledict['pixiv_id'] = LOGIN_DATA_LIST[0]
-        post_tabledict['password'] = LOGIN_DATA_LIST[1]
-        post_tabledict['captcha'] = ""
-        post_tabledict['g_recaptcha_response'] = ""
-        post_tabledict['post_key'] = post_key
-        post_tabledict['source'] = "pc"
-        post_tabledict['ref'] = dataload.LOGIN_POSTDATA_REF
-        post_tabledict['return_to'] = dataload.HTTPS_HOST_URL
+        post_orderdict = OrderedDict()
+        post_orderdict['pixiv_id'] = LOGIN_DATA_LIST[0]
+        post_orderdict['password'] = LOGIN_DATA_LIST[1]
+        post_orderdict['captcha'] = ""
+        post_orderdict['g_recaptcha_response'] = ""
+        post_orderdict['postkey'] = postkey
+        post_orderdict['source'] = "pc"
+        post_orderdict['ref'] = dataload.LOGIN_POSTDATA_REF
+        post_orderdict['return_to'] = dataload.HTTPS_HOST_URL
         # transfer to json data format
-        post_data = urllib.parse.urlencode(post_tabledict).encode("UTF-8")
+        postway_data = urllib.parse.urlencode(post_orderdict).encode("UTF-8")
 
-        return post_data
+        return postway_data
 
     def camouflage_login(self, log_path):
         """Camouflage browser to login

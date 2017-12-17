@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # code by </MATRIX>@Neod Anderjon(LeaderN)
 # =====================================================================
-# this python script is built to add a example to call class lib
+# this python script is built to add an example for callable classes
 
 import dataload
 from privmatrix import Matrix
@@ -16,7 +16,7 @@ def main():
     """
     print(Matrix.__doc__)
 
-    mode = dataload.SHELLINPUT('select mode: ')
+    mode = dataload.SBH_INPUT('select mode: ')
     if mode == 'rtn' or mode == '1':
         build_task = rtn(
             dataload.RANK_DIR, dataload.LOG_PATH, dataload.HTML_PATH)
@@ -28,7 +28,7 @@ def main():
     elif mode == 'help' or mode == '3':
         print(Matrix.__doc__)
     else:
-        dataload.SHELLPRINT("argv(s) error\n")
+        dataload.SBH_PRINT("argv(s) error\n")
 
 if __name__ == '__main__':
     main()
