@@ -13,10 +13,10 @@ import time, random, re, os, getpass, linecache
 import dataload
 
 # global var init value
-login_data_l = []
-_PROXY_HASRUN_FLAG = False
-_DOWNLOAD_POOL = 0
-_ALIVE_GLOBAL = 0
+LOGIN_DATA_LIST = []
+PROXY_HASRUN_FLAG = False
+DOWNLOAD_POOL = 0
+ALIVE_GLOBAL = 0
 
 class Matrix:
     """
@@ -29,7 +29,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.7.0 LTE                                                                                                             #
+    #    Version: 1.8.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -40,10 +40,10 @@ class Matrix:
     def __init__(self):
         # from first login save cookie and create global opener
         # call this opener must write parameter name
-        self.cookie = http.cookiejar.LWPCookieJar()                 # create a cookie words
-        self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie) # add http cookie words
-        self.opener = urllib.request.build_opener(self.cookieHandler) # build the opener
-        urllib.request.install_opener(self.opener)                  # install it
+        self.cookie = http.cookiejar.LWPCookieJar()
+        self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie)
+        self.opener = urllib.request.build_opener(self.cookieHandler)
+        urllib.request.install_opener(self.opener)
 
     @staticmethod
     def _login_infopreload(logincr_path):
@@ -60,38 +60,53 @@ class Matrix:
         """
         is_login_file_existed = os.path.exists(logincr_path)
         if is_login_file_existed:
-            user_mailbox = linecache.getline(logincr_path, 2)  # row 2, usernamemail
-            user_password = linecache.getline(logincr_path, 3)  # row 3, password
+            # read two row content
+            user_mailbox = linecache.getline(logincr_path, 2)
+            user_password = linecache.getline(logincr_path, 3)
             # empty file
             if user_mailbox == '' or user_password == '':
-                dataload.SHELLPRINT("login.cr file invaild, please input your login info")
-                user_mailbox = dataload.SHELLINPUT('enter your pixiv id(mailbox), must be a R18: ')
+                dataload.SHELLPRINT(
+                    "login.cr file invaild, please input your login info")
+                user_mailbox = dataload.SHELLINPUT(
+                    'enter your pixiv id(mailbox), must be a R18: ')
+                # pycharm python console not support getpass input
                 user_password = getpass.getpass(
-                    dataload.SHELLHEAD + 'enter your account password: ')  # pycharm python console not support
+                    dataload.SHELLHEAD + 'enter your account password: ')
             else:
-                check = dataload.SHELLINPUT("please check your info:\n"
-                                            "[!]    username: %s[!]    password: %s"
-                                            "Yes or No?: " % (user_mailbox, user_password))
+                check = dataload.SHELLINPUT(
+                    "please check your info:\n"
+                    "[!]    username: %s[!]    password: %s"
+                    "Yes or No?: "
+                    % (user_mailbox, user_password))
                 # user judge info are error
-                if check != 'yes' and check != 'Yes' and check != 'YES' and check != 'y' and check != 'Y':
-                    dataload.SHELLPRINT("you can write new info")
-                    user_mailbox = dataload.SHELLINPUT('enter your pixiv id(mailbox), must be a R18: ')
-                    user_password = getpass.getpass(dataload.SHELLHEAD + 'enter your account password: ')
+                if (check != 'yes' and check != 'Yes'
+                    and check != 'YES' and check != 'y' and check != 'Y'):
+                    dataload.SHELLPRINT(
+                        "you can write new info")
+                    user_mailbox = dataload.SHELLINPUT(
+                        'enter your pixiv id(mailbox), must be a R18: ')
+                    user_password = getpass.getpass(
+                        dataload.SHELLHEAD + 'enter your account password: ')
                 else:
                     pass
         # no login.cr file
         else:
-            dataload.SHELLPRINT("cannot find login.cr file, please input your login info")
-            user_mailbox = dataload.SHELLINPUT('enter your pixiv id(mailbox), must be a R18: ')
-            user_password = getpass.getpass(dataload.SHELLHEAD + 'enter your account password: ')
+            dataload.SHELLPRINT(
+                "cannot find login.cr file, please input your login info")
+            user_mailbox = dataload.SHELLINPUT(
+                'enter your pixiv id(mailbox), must be a R18: ')
+            user_password = getpass.getpass(
+                dataload.SHELLHEAD + 'enter your account password: ')
 
         # strip() delete symbol '\n'
         username = user_mailbox.strip()
         passwd = user_password.strip()
 
         getway_reg_info = [('user', username), ('pass', passwd)]
-        getway_data = urllib.parse.urlencode(getway_reg_info).encode(encoding='UTF8')
+        getway_data \
+            = urllib.parse.urlencode(getway_reg_info).encode(encoding='UTF8')
 
+        # return login need 3 elements
         return username, passwd, getway_data
 
     @staticmethod
@@ -102,10 +117,10 @@ class Matrix:
         :param log_content: log save content
         :return:            none
         """
-        # this log file must be a new file
-        logFile = open(log_path, 'a+', encoding='utf-8')             # add context to file option 'a+'
+        # add context to file option 'a+'
+        logFile = open(log_path, 'a+', encoding='utf-8')
         dataload.SHELLPRINT(log_content)
-        print(dataload.SHELLHEAD + log_content, file=logFile)        # write into file
+        print(dataload.SHELLHEAD + log_content, file=logFile)
 
     def mkworkdir(self, log_path, folder):
         """Create a crawler work directory
@@ -116,7 +131,8 @@ class Matrix:
         :return:        folder create path
         """
         # create a folder to save picture
-        print(dataload.SHELLHEAD + 'crawler work directory setting: ' + folder)
+        dataload.SHELLPRINT(
+            'crawler work directory setting: ' + folder)
         is_folder_existed = os.path.exists(folder)
         if not is_folder_existed:
             os.makedirs(folder)
@@ -126,10 +142,8 @@ class Matrix:
         # remove old log file
         if os.path.exists(log_path):
             os.remove(log_path)
-        # this step will create a new log file
+        # this step will create a new log file and write the first line
         self.logprowork(log_path, log_context)
-
-        return folder
 
     def _getproxyserver(self, log_path):
         """Catch a proxy server
@@ -140,35 +154,45 @@ class Matrix:
         """
         req_ps_url = dataload.PROXYSERVER_URL
         ps_headers = dataload.uc_user_agent()
-        request = urllib.request.Request(url=req_ps_url,
-                                        headers=ps_headers)
-        response = urllib.request.urlopen(request,
-                                          timeout=30)
-
+        request = urllib.request.Request(
+            url=req_ps_url,
+            headers=ps_headers)
+        try:
+            response = urllib.request.urlopen(
+                request,
+                timeout=30)
+        except Exception as e:
+            log_context = str(e) + "request proxy website failed"
+            self.logprowork(log_path, log_context)
+            response = None
         if response.getcode() == dataload.HTTP_OK_CODE_200:
             log_context = 'crawl proxy successed'
         else:
-            log_context = 'crawl proxy failed, return code: %d' % response.getcode()
+            log_context = 'crawl proxy failed, return code: %d' \
+                          % response.getcode()
         self.logprowork(log_path, log_context)
 
         web_src = response.read().decode("UTF-8", "ignore")
         proxy_pattern = re.compile(dataload.PROXYIP_REGEX, re.S)
         proxy_rawwords = re.findall(proxy_pattern, web_src)
+
+        # catch key words in web source
         proxy_iplist = []
         for i in range(len(proxy_rawwords)):
-            if i % 5 == 0 and proxy_rawwords[i].isdigit():           # analysis port num
+            if i % 5 == 0 and proxy_rawwords[i].isdigit():
                 # build proxy ip string
                 proxy_ip = dataload.PROXYIP_STR_BUILD(i, proxy_rawwords)
                 proxy_iplist.append(proxy_ip)
             else:
                 pass
-        proxy_choose = random.choice(proxy_iplist)                  # random choose a proxy
-        proxy_server = {'http': proxy_choose}                       # setting proxy server
+        # random choose a proxy ip and port
+        proxy_choose = random.choice(proxy_iplist)
+        proxyserver_d = {'http': proxy_choose}
 
         log_context = 'choose proxy server: ' + proxy_choose
         self.logprowork(log_path, log_context)
 
-        return proxy_server
+        return proxyserver_d
 
     def _gatherpostkey(self, log_path):
         """POST way login need post-key
@@ -176,19 +200,30 @@ class Matrix:
         :param log_path:    log save path
         :return:            post way request data
         """
-        global login_data_l
-        login_data_l = self._login_infopreload(dataload.LOGINCR_PATH)
+        global LOGIN_DATA_LIST
+        LOGIN_DATA_LIST = self._login_infopreload(dataload.LOGINCR_PATH)
         # request a post key
-        response = self.opener.open(dataload.LOGIN_POSTKEY_URL, timeout=30)
+        try:
+            response = self.opener.open(
+                dataload.LOGIN_POSTKEY_URL,
+                timeout=30)
+        except Exception as e:
+            log_context = str(e) + "request post-key failed"
+            self.logprowork(log_path, log_context)
+            response = None
         if response.getcode() == dataload.HTTP_OK_CODE_200:
             log_context = 'post-key response successed'
         else:
-            log_context = 'post-key response failed, return code: %d' % response.getcode()
+            log_context = 'post-key response failed, return code: %d' \
+                          % response.getcode()
         self.logprowork(log_path, log_context)
+
         # cookie check
         for item in self.cookie:
-            log_context = 'cookie: [name:' + item.name + '-value:' + item.value + ']'
+            log_context = \
+                'cookie: [name:' + item.name + '-value:' + item.value + ']'
             self.logprowork(log_path, log_context)
+
         # mate post key
         web_src = response.read().decode("UTF-8", "ignore")
         post_pattern = re.compile(dataload.POSTKEY_REGEX, re.S)
@@ -196,10 +231,10 @@ class Matrix:
         log_context = 'get post-key: ' + post_key
         self.logprowork(log_path, log_context)
 
-        # build basic dict
-        post_tabledict = OrderedDict()                              # this post data must has a order
-        post_tabledict['pixiv_id'] = login_data_l[0]
-        post_tabledict['password'] = login_data_l[1]
+        # build post-way data order dict
+        post_tabledict = OrderedDict()
+        post_tabledict['pixiv_id'] = LOGIN_DATA_LIST[0]
+        post_tabledict['password'] = LOGIN_DATA_LIST[1]
         post_tabledict['captcha'] = ""
         post_tabledict['g_recaptcha_response'] = ""
         post_tabledict['post_key'] = post_key
@@ -218,15 +253,21 @@ class Matrix:
         :return:        none
         """
         # login init need to commit post data to Pixiv
-        post_data = self._gatherpostkey(log_path)                      # get post-key and build post-data
-        response = self.opener.open(fullurl=dataload.LOGIN_REQUEST_URL,
-                                    data=post_data,
-                                    timeout=40)
-        # first must login to website then can request page
+        post_data = self._gatherpostkey(log_path)
+        try:
+            response = self.opener.open(
+                fullurl=dataload.LOGIN_REQUEST_URL,
+                data=post_data,
+                timeout=30)
+        except Exception as e:
+            log_context = str(e) + "login timeout failed"
+            self.logprowork(log_path, log_context)
+            response = None
         if response.getcode() == dataload.HTTP_OK_CODE_200:
             log_context = 'login response successed'
         else:
-            log_context = 'login response fatal, return code %d' % response.getcode()
+            log_context = 'login response fatal, return code %d' \
+                          % response.getcode()
         self.logprowork(log_path, log_context)
 
     def save_test_html(self, workdir, content, log_path):
@@ -237,7 +278,7 @@ class Matrix:
         :param log_path:    log save path
         :return:            none
         """
-        htmlfile = open(workdir + dataload.storage_l[1] + 'test.html', "w")
+        htmlfile = open(workdir + dataload.fs_operation[1] + 'test.html', "w")
         htmlfile.write(content)
         htmlfile.close()
         log_context = 'save request html page ok'
@@ -261,28 +302,34 @@ class Matrix:
         # this crawler will give gif format up and crawl png or jpg
         # pixiv one repo maybe have multi-images
         for item in img_whole_info:
-            thumbnail = re.findall(datasrc_pattern, item)[0]         # mate thumbnail image
-            judge_word = thumbnail[-18:]                             # _p0_master1200.jpg
+            # mate thumbnail image
+            thumbnail = re.findall(datasrc_pattern, item)[0]
+            # cut judge key word
+            judge_word = thumbnail[-18:]
+
             # check jpg/png or gif
             if judge_word == dataload.JUDGE_NOGIF_WORD:
                 span_nbr = re.findall(span_pattern, item)
                 # catch vaild word from thumbnail url
-                vaildWord = thumbnail[44:-18]                       # cut vaild words
+                vaildWord = thumbnail[44:-18]
+
                 # try to check multi-span images
-                if len(span_nbr) != 0:                              # non-empty list
-                    for p in range(int(span_nbr[0])):
-                        # gather image info
+                if len(span_nbr) != 0:
+                    # one commit artwork has more pages, iter it
+                    for _px in range(int(span_nbr[0])):
+                        # set same info
                         info = re.findall(info_pattern, item)[0]
                         info_group_l.append(info)
-                        # build original image url
-                        target_url = dataload.ORIGINAL_IMAGE_HEAD + vaildWord + dataload.ORIGINAL_IMAGE_TAIL(p)
+                        # more pages point
+                        target_url = dataload.ORIGINAL_IMAGE_HEAD + vaildWord \
+                                     + dataload.ORIGINAL_IMAGE_TAIL(_px)
                         url_group_l.append(target_url)
                 else:
-                    # gather image info
                     info = re.findall(info_pattern, item)[0]
                     info_group_l.append(info)
-                    # build original image url
-                    target_url = dataload.ORIGINAL_IMAGE_HEAD + vaildWord + dataload.ORIGINAL_IMAGE_TAIL(0)
+                    # only _p0 page
+                    target_url = dataload.ORIGINAL_IMAGE_HEAD + vaildWord \
+                                 + dataload.ORIGINAL_IMAGE_TAIL(0)
                     url_group_l.append(target_url)
             # give up gif format
             else:
@@ -302,82 +349,95 @@ class Matrix:
         :param log_path:        log save path
         :return:                none
         """
-        # set images download arguments
-        global _DOWNLOAD_POOL
-        global _PROXY_HASRUN_FLAG
+        global DOWNLOAD_POOL
+        global PROXY_HASRUN_FLAG
         proxy_handler = None
-        timeout = 30                                                # default set to 30s
+        timeout = 30
         img_datatype = 'png'
-        image_name = url[57:-4]                                     # id+_px
+        # artwork_id + _px
+        image_name = url[57:-4]
 
-        # setting headers
+        # setting new headers
         headers = dataload.build_original_headers(basepages[index])
         list_headers = dataload.dict_transto_list(headers)
         self.opener.addheaders = list_headers
-        urllib.request.install_opener(self.opener)                  # must install new
-        response = None
+        # update install opener
+        urllib.request.install_opener(self.opener)
 
+        # this request image step will delay much time
+        response = None
         try:
-            response = self.opener.open(fullurl=url,
-                                        timeout=timeout)
-        # timeout or image data type error
+            response = self.opener.open(
+                fullurl=url,
+                timeout=timeout)
         except urllib.error.HTTPError as e:
             ## log_context = str(e.code)
             ## self.logprowork(logpath, log_context)
 
             # http error 404, change image type
             if e.code == dataload.HTTP_NOTFOUND_CODE_404:
-                img_datatype = 'jpg'                                 # change data type
+                # change data type
+                img_datatype = 'jpg'
                 jpg_img_url = url[0:-3] + img_datatype
                 try:
-                    response = self.opener.open(fullurl=jpg_img_url,
-                                                timeout=timeout)
+                    response = self.opener.open(
+                        fullurl=jpg_img_url,
+                        timeout=timeout)
                 except urllib.error.HTTPError as e:
                     ## log_context = str(e.code)
                     ## self.logprowork(logpath, log_context)
 
-                    # not 404 change proxy, cause request server forbidden crawler
+                    # not 404 change proxy, cause request server forbidden
                     if e.code != dataload.HTTP_NOTFOUND_CODE_404:
                         # if timeout, use proxy reset request
                         log_context = "change proxy server"
                         self.logprowork(log_path, log_context)
 
                         # preload proxy, just once
-                        if _PROXY_HASRUN_FLAG is False:
-                            _PROXY_HASRUN_FLAG = True  # no reset
+                        if PROXY_HASRUN_FLAG is False:
+                            PROXY_HASRUN_FLAG = True  # no reset
                             proxy = self._getproxyserver(log_path)
                             proxy_handler = urllib.request.ProxyHandler(proxy)
                         else:
                             pass
-                        self.opener = urllib.request.build_opener(proxy_handler) # add proxy handler
-                        response = self.opener.open(fullurl=jpg_img_url,
-                                                    timeout=timeout)
+                        # add proxy handler
+                        self.opener = urllib.request.build_opener(proxy_handler)
+                        # re-request
+                        response = self.opener.open(
+                            fullurl=jpg_img_url,
+                            timeout=timeout)
                     else:
                         pass
             # if timeout, use proxy reset request
             else:
                 log_context = "change proxy server"
                 self.logprowork(log_path, log_context)
-                self.opener = urllib.request.build_opener(proxy_handler) # add proxy handler
-                response = self.opener.open(fullurl=url,
-                                            timeout=timeout)
-        # save request bin data file
+                self.opener = urllib.request.build_opener(proxy_handler)
+                response = self.opener.open(
+                    fullurl=url,
+                    timeout=timeout)
+
+        # save image bin data to files
         if response.getcode() == dataload.HTTP_OK_CODE_200:
-            # save response data to image format
             img_bindata = response.read()
-            source_size = float(len(img_bindata) / 1024)            # get image size
-            _DOWNLOAD_POOL += source_size                            # calcus download source whole size
-            # this step will delay much time
-            with open(img_savepath + dataload.storage_l[1] + image_name + '.' + img_datatype, 'wb') as img:
+
+            # calcus download source whole size
+            source_size = float(len(img_bindata) / 1024)
+            DOWNLOAD_POOL += source_size
+
+            with open(img_savepath + dataload.fs_operation[1]
+                      + image_name + '.' + img_datatype, 'wb') as img:
                 img.write(img_bindata)
-            log_context = 'target no.%d image download finished, image size: %dKB' % (index + 1, source_size)
+            log_context = 'target no.%d image download finished,' \
+                          ' image size: %dKB' % (index + 1, source_size)
             self.logprowork(log_path, log_context)
 
     class _MultiThreading(threading.Thread):
         """Overrides its run method by inheriting the Thread class
 
         This class can be placed outside the main class, you can also put inside
-        Threads are the smallest unit of program execution flow that is less burdensome than process creation
+        threads are the smallest unit of program execution flow
+        that is less burdensome than process creation
         Internal call
         """
         def __init__(self, lock, i, img_url, basepages, img_savepath, log_path):
@@ -392,7 +452,6 @@ class Matrix:
             """
             # callable class init
             threading.Thread.__init__(self)
-            # arguments transfer to global
             self.lock = lock
             self.i = i
             self.img_url = img_url
@@ -407,7 +466,8 @@ class Matrix:
             """
             # cancel lock release will let multi-process change to easy process
             ## self.lock.acquire()
-            Matrix()._save_oneimage(self.i, self.img_url, self.base_pages, self.imgPath, self.logPath)
+            Matrix()._save_oneimage(self.i, self.img_url, self.base_pages,
+                                    self.imgPath, self.logPath)
             ## self.lock.release()
 
     def download_alltarget(self, urls, basepages, workdir, log_path):
@@ -419,35 +479,51 @@ class Matrix:
         :param log_path:    log save path
         :return:            none
         """
-        global _DOWNLOAD_POOL
-        global _ALIVE_GLOBAL
+        global DOWNLOAD_POOL
+        global ALIVE_GLOBAL
         queueLength = len(urls)
+
         log_context = 'start to download %d target(s)======>' % queueLength
         self.logprowork(log_path, log_context)
 
-        lock = threading.Lock()                                     # object lock
-        aliveThreadCnt = queueLength                                # init value
-        starttime = time.time()                                     # log download elapsed time
+        lock = threading.Lock()
+        # here init var alive thread count
+        aliveThreadCnt = queueLength
+
+        # log download elapsed time
+        starttime = time.time()
+
+        # create overwrite threading.Thread object
         for i, img_url in enumerate(urls):
-            # create overwrite threading.Thread object
-            sub_thread = self._MultiThreading(lock, i, img_url, basepages, workdir, log_path)
-            sub_thread.setDaemon(False)                             # set every download sub-process is non-daemon process
-            sub_thread.start()                                      # start download
-            ## time.sleep(0.1)                                         # confirm thread has been created, delay cannot too long
+            sub_thread = self._MultiThreading(lock, i, img_url, basepages,
+                                              workdir, log_path)
+            # set every download sub-process is non-daemon process
+            sub_thread.setDaemon(False)
+            sub_thread.start()
+            # confirm thread has been created, delay cannot too long
+            ## time.sleep(0.1)
+
         # parent thread wait all sub-thread end
-        while aliveThreadCnt > 1:                                   # finally only parent process
-            _ALIVE_GLOBAL = threading.active_count()                # global variable update
+        while aliveThreadCnt > 1:
+            # global variable update
+            ALIVE_GLOBAL = threading.active_count()
+
             # when alive thread count change, print its value
-            if aliveThreadCnt != _ALIVE_GLOBAL:
-                log_context = 'currently remaining sub-thread(s): %d/%d' % (aliveThreadCnt - 1, queueLength)
+            if aliveThreadCnt != ALIVE_GLOBAL:
+                # update alive thread count
+                aliveThreadCnt = ALIVE_GLOBAL
+                log_context = 'currently remaining sub-thread(s): %d/%d' \
+                              % (aliveThreadCnt - 1, queueLength)
                 self.logprowork(log_path, log_context)
-                aliveThreadCnt = _ALIVE_GLOBAL                      # after print update value
+
         # calcus average download speed and whole elapesd time
         endtime = time.time()
         elapesd_time = endtime - starttime
-        average_download_speed = float(_DOWNLOAD_POOL / elapesd_time)
+        average_download_speed = float(DOWNLOAD_POOL / elapesd_time)
+
         log_context = "all of threads reclaim, elapsed time: %0.2fs, " \
-                     "average download speed: %0.2fKB/s" % (elapesd_time, average_download_speed)
+                     "average download speed: %0.2fKB/s" \
+                      % (elapesd_time, average_download_speed)
         self.logprowork(log_path, log_context)
 
     def htmlpreview_build(self, workdir, html_path, log_path):
@@ -459,31 +535,48 @@ class Matrix:
         :param log_path:    log save path
         :return:            none
         """
-        html_file = open(html_path, "w")                            # write html file
+        html_file = open(html_path, "w")
         # build html background page text
-        html_file.writelines("<html>\r\n<head>\r\n<title>MatPixivCrawler3 ResultPage</title>\r\n</head>\r\n<body>\r\n")
-        html_file.writelines("<script>window.onload = function(){"
-                            "var imgs = document.getElementsByTagName('img');"
-                            "for(var i = 0; i < imgs.length; i++){"
-                            "imgs[i].onclick = function(){"
-                            "if(this.width == this.attributes['oriWidth'].value && this.height == this.attributes['oriHeight'].value){"
-                            "this.width = this.attributes['oriWidth'].value * 1.0 / this.attributes['oriHeight'].value * 200;"
+        # write a title
+        html_file.writelines(
+            "<html>\r\n"
+            "<head>\r\n"
+            "<title>MatPixivCrawler3 ResultPage</title>\r\n"
+            "</head>\r\n"
+            "<body>\r\n")
+        # put all crawl images into html source code
+        html_file.writelines(
+            "<script>window.onload = function(){"
+                "var imgs = document.getElementsByTagName('img');"
+                "for(var i = 0; i < imgs.length; i++){"
+                    "imgs[i].onclick = function(){"
+                        "if(this.width == this.attributes['oriWidth'].value "
+                            "&& this.height == this.attributes['oriHeight'].value){"
+                            "this.width = this.attributes['oriWidth'].value * 1.0 "
+                            "/ this.attributes['oriHeight'].value * 200;"
                             "this.height = 200;"
-                            "}else{this.width = this.attributes['oriWidth'].value ;"
-                            "this.height = this.attributes['oriHeight'].value;}}}};</script>")
+                        "}else{this.width = this.attributes['oriWidth'].value ;"
+                        "this.height = this.attributes['oriHeight'].value;}}}};"
+            "</script>")
         for i in os.listdir(workdir):
-            if i[-4:len(i)] in [".png", ".jpg", ".bmp"]:            # support image format
-                width, height = Image.open(workdir + dataload.storage_l[1] + i).size
+            if i[-4:len(i)] in [".png", ".jpg", ".bmp"]:
+                width, height = Image.open(
+                    workdir + dataload.fs_operation[1] + i).size
                 i = i.replace("#", "%23")
                 ## html_file.writelines("<a href = \"%s\">"%("./" + filename))
-                # set image source line
+                # set image size
                 html_file.writelines(
-                    "<img src = \"%s\" width = \"%dpx\" height = \"%dpx\" oriWidth = %d oriHeight = %d />\r\n"
-                    % ("./" + i, width * 1.0 / height * 200, 200, width, height)) # limit display images size
+                    "<img src = \"%s\" width = \"%dpx\" height = \"%dpx\" "
+                    "oriWidth = %d oriHeight = %d />\r\n"
+                    % ("./" + i, width * 1.0 / height * 200, 200, width, height))
                 ## html_file.writelines("</a>\r\n")
+
         # end of htmlfile
-        html_file.writelines("</body>\r\n</html>")
+        html_file.writelines(
+            "</body>\r\n"
+            "</html>")
         html_file.close()
+
         log_context = 'image browse html generate finished'
         self.logprowork(log_path, log_context)
 
@@ -494,20 +587,21 @@ class Matrix:
         :return:            none
         """
         # end time log
-        rtc = time.localtime()                                      # real log get
-        ymdhms = '%d-%d-%d %d:%d:%d' % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
+        rtc = time.localtime()
+        ymdhms = '%d-%d-%d %d:%d:%d' \
+                 % (rtc[0], rtc[1], rtc[2], rtc[3], rtc[4], rtc[5])
         log_context = "crawler work finished, log time: " + ymdhms
         self.logprowork(log_path, log_context)
 
         # logo display
-        log_context = \
-            dataload.LABORATORY + ' ' + dataload.ORGANIZATION \
-            + ' technology support\n'                                   \
-            'Code by ' + dataload.ORGANIZATION + '@' + dataload.DEVELOPER
+        log_context =(
+            dataload.LABORATORY + ' ' + dataload.ORGANIZATION
+            + ' technology support\n'                                   
+            'Code by ' + dataload.ORGANIZATION + '@' + dataload.DEVELOPER)
 
         # open work directory, check result
         self.logprowork(log_path, log_context)
-        os.system(dataload.storage_l[2] + ' ' + dataload.storage_l[0])
+        os.system(dataload.fs_operation[2] + ' ' + dataload.fs_operation[0])
 
 # =====================================================================
 # code by </MATRIX>@Neod Anderjon(LeaderN)

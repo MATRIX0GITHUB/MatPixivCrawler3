@@ -18,10 +18,12 @@ def main():
 
     mode = dataload.SHELLINPUT('select mode: ')
     if mode == 'rtn' or mode == '1':
-        build_task = rtn(dataload.RANK_DIR, dataload.LOG_PATH, dataload.HTML_PATH)
+        build_task = rtn(
+            dataload.RANK_DIR, dataload.LOG_PATH, dataload.HTML_PATH)
         build_task.start()
     elif mode == 'ira' or mode == '2':
-        build_task = ira(dataload.REPO_DIR, dataload.LOG_NAME, dataload.HTML_NAME)
+        build_task = ira(
+            dataload.REPO_DIR, dataload.LOG_NAME, dataload.HTML_NAME)
         build_task.start()
     elif mode == 'help' or mode == '3':
         print(Matrix.__doc__)
