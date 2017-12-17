@@ -162,7 +162,7 @@ class Matrix:
                 request,
                 timeout=30)
         except Exception as e:
-            log_context = str(e) + "request proxy website failed"
+            log_context = str(e) + " request proxy website failed"
             self.logprowork(log_path, log_context)
             response = None
         if response.getcode() == dataload.HTTP_OK_CODE_200:
@@ -208,7 +208,7 @@ class Matrix:
                 dataload.LOGIN_POSTKEY_URL,
                 timeout=30)
         except Exception as e:
-            log_context = str(e) + "request post-key failed"
+            log_context = str(e) + " request post-key failed"
             self.logprowork(log_path, log_context)
             response = None
         if response.getcode() == dataload.HTTP_OK_CODE_200:
@@ -237,10 +237,12 @@ class Matrix:
         post_orderdict['password'] = LOGIN_DATA_LIST[1]
         post_orderdict['captcha'] = ""
         post_orderdict['g_recaptcha_response'] = ""
-        post_orderdict['postkey'] = postkey
+        # if refacte here, do not change this flag
+        post_orderdict['post_key'] = postkey
         post_orderdict['source'] = "pc"
         post_orderdict['ref'] = dataload.LOGIN_POSTDATA_REF
         post_orderdict['return_to'] = dataload.HTTPS_HOST_URL
+
         # transfer to json data format
         postway_data = urllib.parse.urlencode(post_orderdict).encode("UTF-8")
 
@@ -253,21 +255,24 @@ class Matrix:
         :return:        none
         """
         # login init need to commit post data to Pixiv
-        post_data = self._gatherpostkey(log_path)
+        postway_data = self._gatherpostkey(log_path)
+        # the most important step
         try:
             response = self.opener.open(
                 fullurl=dataload.LOGIN_REQUEST_URL,
-                data=post_data,
+                data=postway_data,
                 timeout=30)
         except Exception as e:
-            log_context = str(e) + "login timeout failed"
+            log_context = str(e) + " login timeout failed"
             self.logprowork(log_path, log_context)
             response = None
+            exit()
         if response.getcode() == dataload.HTTP_OK_CODE_200:
             log_context = 'login response successed'
         else:
             log_context = 'login response fatal, return code %d' \
                           % response.getcode()
+            exit()
         self.logprowork(log_path, log_context)
 
     def save_test_html(self, workdir, content, log_path):

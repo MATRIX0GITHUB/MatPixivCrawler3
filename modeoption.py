@@ -126,7 +126,7 @@ class RankingTop(object):
                 data=privmatrix.LOGIN_DATA_LIST[2],
                 timeout=30)
         except Exception as e:
-            log_context = str(e) + "open ranking page failed"
+            log_context = str(e) + " open ranking page failed"
             _pvmx.logprowork(log_path, log_context)
             response = None
         if response.getcode() == dataload.HTTP_OK_CODE_200:
@@ -210,9 +210,15 @@ class RepertoAll(object):
         """
         # get illust artwork whole count mainpage url
         cnt_url = dataload.MEMBER_ILLUST_URL + illust_id
-        response = _pvmx.opener.open(fullurl=cnt_url,
-                                     data=privmatrix.LOGIN_DATA_LIST[2],
-                                     timeout=30)
+        try:
+            response = _pvmx.opener.open(
+                fullurl=cnt_url,
+                data=privmatrix.LOGIN_DATA_LIST[2],
+                timeout=30)
+        except Exception as e:
+            dataload.SBH_PRINT(
+                str(e) + " open first mainpage failed")
+            response = None
         web_src = response.read().decode("UTF-8", "ignore")
 
         # mate illustrator name
@@ -221,7 +227,8 @@ class RepertoAll(object):
         # if login failed, this step will raise an error
         arthor_name = None
         if len(arthor_names) == 0:
-            dataload.SBH_PRINT("login failed, please check method call")
+            dataload.SBH_PRINT(
+                "login failed, please check method call")
             exit()
         else:
             arthor_name = arthor_names[0]
@@ -260,7 +267,7 @@ class RepertoAll(object):
                  data=privmatrix.LOGIN_DATA_LIST[2],
                  timeout=30)
         except Exception as e:
-            log_context = str(e) + "open %d page failed" % index
+            log_context = str(e) + " open %d page failed" % index
             _pvmx.logprowork(log_path, log_context)
             response = None
         if response.getcode() == dataload.HTTP_OK_CODE_200:
