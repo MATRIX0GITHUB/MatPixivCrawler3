@@ -123,7 +123,7 @@ class RankingTop(object):
         try:
             response = _pvmx.opener.open(
                 fullurl=page_url,
-                data=privmatrix.LOGIN_DATA_LIST[2],
+                data=_pvmx.login_bias[2],
                 timeout=30)
         except Exception as e:
             log_context = str(e) + " open ranking page failed"
@@ -213,7 +213,7 @@ class RepertoAll(object):
         try:
             response = _pvmx.opener.open(
                 fullurl=cnt_url,
-                data=privmatrix.LOGIN_DATA_LIST[2],
+                data=_pvmx.login_bias[2],
                 timeout=30)
         except Exception as e:
             dataload.SBH_PRINT(
@@ -264,7 +264,7 @@ class RepertoAll(object):
         try:
             response = _pvmx.opener.open(
                 fullurl=urlTarget,
-                 data=privmatrix.LOGIN_DATA_LIST[2],
+                 data=_pvmx.login_bias[2],
                  timeout=30)
         except Exception as e:
             log_context = str(e) + " open %d page failed" % index

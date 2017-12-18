@@ -12,12 +12,6 @@ from collections import OrderedDict
 import time, random, re, os, getpass, linecache
 import dataload
 
-# global var init value
-LOGIN_DATA_LIST = []
-PROXY_HASRUN_FLAG = False
-DOWNLOAD_POOL = 0
-ALIVE_GLOBAL = 0
-
 class Matrix:
     """
     #####################################################################################################################################
@@ -29,7 +23,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.8.0 LTE                                                                                                             #
+    #    Version: 1.9.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler Help Page                                                                                                      #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
@@ -37,6 +31,12 @@ class Matrix:
     #    help   ---     print this help page                                                                                            #
     #####################################################################################################################################
     """
+    # init class variable
+    login_bias = []                 # login data: username, passwd, getway_data
+    proxy_hasrun_flag = False       # create proxy handler once flag
+    datastream_pool = 0             # download data-stream(KB) whole pool
+    alivethread_counter = 0         # multi-thread alive sub-threads count
+
     def __init__(self):
         # from first login save cookie and create global opener
         # call this opener must write parameter name
@@ -118,9 +118,9 @@ class Matrix:
         :return:            none
         """
         # add context to file option 'a+'
-        logFile = open(log_path, 'a+', encoding='utf-8')
+        log_filepath = open(log_path, 'a+', encoding='utf-8')
         dataload.SBH_PRINT(log_content)
-        print(dataload.SHELL_BASHHEAD + log_content, file=logFile)
+        print(dataload.SHELL_BASHHEAD + log_content, file=log_filepath)
 
     def mkworkdir(self, log_path, folder):
         """Create a crawler work directory
@@ -200,8 +200,7 @@ class Matrix:
         :param log_path:    log save path
         :return:            post way request data
         """
-        global LOGIN_DATA_LIST
-        LOGIN_DATA_LIST = self._login_infopreload(dataload.LOGINCR_PATH)
+        Matrix.login_bias = self._login_infopreload(dataload.LOGINCR_PATH)
         # request a post key
         try:
             response = self.opener.open(
@@ -233,8 +232,8 @@ class Matrix:
 
         # build post-way data order dict
         post_orderdict = OrderedDict()
-        post_orderdict['pixiv_id'] = LOGIN_DATA_LIST[0]
-        post_orderdict['password'] = LOGIN_DATA_LIST[1]
+        post_orderdict['pixiv_id'] = Matrix.login_bias[0]
+        post_orderdict['password'] = Matrix.login_bias[1]
         post_orderdict['captcha'] = ""
         post_orderdict['g_recaptcha_response'] = ""
         # if refacte here, do not change this flag
@@ -354,8 +353,6 @@ class Matrix:
         :param log_path:        log save path
         :return:                none
         """
-        global DOWNLOAD_POOL
-        global PROXY_HASRUN_FLAG
         proxy_handler = None
         timeout = 30
         img_datatype = 'png'
@@ -398,13 +395,15 @@ class Matrix:
                         log_context = "change proxy server"
                         self.logprowork(log_path, log_context)
 
-                        # preload proxy, just once
-                        if PROXY_HASRUN_FLAG is False:
-                            PROXY_HASRUN_FLAG = True  # no reset
+                        # preload a proxy handler, just run once
+                        if Matrix.proxy_hasrun_flag is False:
+                            Matrix.proxy_hasrun_flag = True
                             proxy = self._getproxyserver(log_path)
                             proxy_handler = urllib.request.ProxyHandler(proxy)
                         else:
                             pass
+                            proxy_handler = None
+
                         # add proxy handler
                         self.opener = urllib.request.build_opener(proxy_handler)
                         # re-request
@@ -428,7 +427,7 @@ class Matrix:
 
             # calcus download source whole size
             source_size = float(len(img_bindata) / 1024)
-            DOWNLOAD_POOL += source_size
+            Matrix.datastream_pool += source_size
 
             with open(img_savepath + dataload.fs_operation[1]
                       + image_name + '.' + img_datatype, 'wb') as img:
@@ -484,8 +483,6 @@ class Matrix:
         :param log_path:    log save path
         :return:            none
         """
-        global DOWNLOAD_POOL
-        global ALIVE_GLOBAL
         queueLength = len(urls)
 
         log_context = 'start to download %d target(s)======>' % queueLength
@@ -511,12 +508,12 @@ class Matrix:
         # parent thread wait all sub-thread end
         while aliveThreadCnt > 1:
             # global variable update
-            ALIVE_GLOBAL = threading.active_count()
+            Matrix.alivethread_counter = threading.active_count()
 
             # when alive thread count change, print its value
-            if aliveThreadCnt != ALIVE_GLOBAL:
+            if aliveThreadCnt != Matrix.alivethread_counter:
                 # update alive thread count
-                aliveThreadCnt = ALIVE_GLOBAL
+                aliveThreadCnt = Matrix.alivethread_counter
                 log_context = 'currently remaining sub-thread(s): %d/%d' \
                               % (aliveThreadCnt - 1, queueLength)
                 self.logprowork(log_path, log_context)
@@ -524,7 +521,7 @@ class Matrix:
         # calcus average download speed and whole elapesd time
         endtime = time.time()
         elapesd_time = endtime - starttime
-        average_download_speed = float(DOWNLOAD_POOL / elapesd_time)
+        average_download_speed = float(Matrix.datastream_pool / elapesd_time)
 
         log_context = "all of threads reclaim, elapsed time: %0.2fs, " \
                      "average download speed: %0.2fKB/s" \
