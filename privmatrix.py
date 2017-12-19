@@ -295,7 +295,7 @@ class Matrix:
 
     @staticmethod
     def data_sizer(whole_pattern, info_pattern, web_src):
-        """A sizer for all of imags in a pages
+        """A sizer for all of images in a page
 
         :param whole_pattern:   whole info data regex compile pattern
         :param info_pattern:    image info regex compile pattern
@@ -352,7 +352,7 @@ class Matrix:
 
         Add retry decorator, if first try failed, it will auto-retry
         :param index:           image index
-        :param url:             image urls list
+        :param url:             one image url
         :param basepages:       referer basic pages list
         :param img_savepath:    image save path
         :param log_path:        log save path
@@ -500,8 +500,8 @@ class Matrix:
         starttime = time.time()
 
         # create overwrite threading.Thread object
-        for i, img_url in enumerate(urls):
-            sub_thread = self._MultiThreading(lock, i, img_url, basepages,
+        for i, one_url in enumerate(urls):
+            sub_thread = self._MultiThreading(lock, i, one_url, basepages,
                                               workdir, log_path)
             # set every download sub-process is non-daemon process
             sub_thread.setDaemon(False)
@@ -518,8 +518,8 @@ class Matrix:
             if aliveThreadCnt != Matrix._alivethread_counter:
                 # update alive thread count
                 aliveThreadCnt = Matrix._alivethread_counter
-                log_context = 'currently remaining sub-thread(s): %d/%d' \
-                              % (aliveThreadCnt - 1, queueLength)
+                log_context = ('currently remaining sub-thread(s): %d/%d' 
+                              % (aliveThreadCnt - 1, queueLength))
                 self.logprowork(log_path, log_context)
 
         # calcus average download speed and whole elapesd time
@@ -527,9 +527,9 @@ class Matrix:
         elapesd_time = endtime - starttime
         average_download_speed = float(Matrix._datastream_pool / elapesd_time)
 
-        log_context = "all of threads reclaim, elapsed time: %0.2fs, " \
-                     "average download speed: %0.2fKB/s" \
-                      % (elapesd_time, average_download_speed)
+        log_context = ("all of threads reclaim, elapsed time: %0.2fs, " 
+                     "average download speed: %0.2fKB/s"
+                      % (elapesd_time, average_download_speed))
         self.logprowork(log_path, log_context)
 
     def htmlpreview_build(self, workdir, html_path, log_path):
