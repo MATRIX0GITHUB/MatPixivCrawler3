@@ -25,21 +25,26 @@ class Matrix:
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
     #    Version: 1.9.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
-    #    MatPixivCrawler Help Page                                                                                                      #
-    #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month rank top N artwork(s)                                               #
-    #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all artwork(s)                                                       #
-    #    help   ---     print this help page                                                                                            #
+    #    MatPixivCrawler3 Help Page                                                                                                     #
+    #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month ranking top artworks                                                #
+    #    2.ira  ---     illustRepoAll, crawl Pixiv any illustrator all repertory artworks                                               #
+    #    3.help ---     print this help page                                                                                            #
     #####################################################################################################################################
     """
+
     # init class variable
-    login_bias = []                 # login data: username, passwd, getway_data
-    proxy_hasrun_flag = False       # create proxy handler once flag
-    datastream_pool = 0             # download data-stream(KB) whole pool
-    alivethread_counter = 0         # multi-thread alive sub-threads count
+    login_bias = []                 # login data: username, passwd, getway_data, agree public call
+    _proxy_hasrun_flag = False      # create proxy handler once flag, only class internal call
+    _datastream_pool = 0            # download data-stream(KB) whole pool, only class internal call
+    _alivethread_counter = 0        # multi-thread alive sub-threads count, only class internal call
 
     def __init__(self):
-        # from first login save cookie and create global opener
-        # call this opener must write parameter name
+        """Create a class public call webpage opener with cookie
+
+        From first login save cookie and continue use
+        Call this opener must write parameter name
+        Cookie will delete when program end
+        """
         self.cookie = http.cookiejar.LWPCookieJar()
         self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie)
         self.opener = urllib.request.build_opener(self.cookieHandler)
@@ -396,13 +401,12 @@ class Matrix:
                         self.logprowork(log_path, log_context)
 
                         # preload a proxy handler, just run once
-                        if Matrix.proxy_hasrun_flag is False:
-                            Matrix.proxy_hasrun_flag = True
+                        if Matrix._proxy_hasrun_flag is False:
+                            Matrix._proxy_hasrun_flag = True
                             proxy = self._getproxyserver(log_path)
                             proxy_handler = urllib.request.ProxyHandler(proxy)
                         else:
                             pass
-                            proxy_handler = None
 
                         # add proxy handler
                         self.opener = urllib.request.build_opener(proxy_handler)
@@ -427,7 +431,7 @@ class Matrix:
 
             # calcus download source whole size
             source_size = float(len(img_bindata) / 1024)
-            Matrix.datastream_pool += source_size
+            Matrix._datastream_pool += source_size
 
             with open(img_savepath + dataload.fs_operation[1]
                       + image_name + '.' + img_datatype, 'wb') as img:
@@ -508,12 +512,12 @@ class Matrix:
         # parent thread wait all sub-thread end
         while aliveThreadCnt > 1:
             # global variable update
-            Matrix.alivethread_counter = threading.active_count()
+            Matrix._alivethread_counter = threading.active_count()
 
             # when alive thread count change, print its value
-            if aliveThreadCnt != Matrix.alivethread_counter:
+            if aliveThreadCnt != Matrix._alivethread_counter:
                 # update alive thread count
-                aliveThreadCnt = Matrix.alivethread_counter
+                aliveThreadCnt = Matrix._alivethread_counter
                 log_context = 'currently remaining sub-thread(s): %d/%d' \
                               % (aliveThreadCnt - 1, queueLength)
                 self.logprowork(log_path, log_context)
@@ -521,7 +525,7 @@ class Matrix:
         # calcus average download speed and whole elapesd time
         endtime = time.time()
         elapesd_time = endtime - starttime
-        average_download_speed = float(Matrix.datastream_pool / elapesd_time)
+        average_download_speed = float(Matrix._datastream_pool / elapesd_time)
 
         log_context = "all of threads reclaim, elapsed time: %0.2fs, " \
                      "average download speed: %0.2fKB/s" \
