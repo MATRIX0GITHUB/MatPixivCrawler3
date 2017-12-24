@@ -23,7 +23,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 1.9.0 LTE                                                                                                             #
+    #    Version: 2.0.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler3 Help Page                                                                                                     #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month ranking top artworks                                                #
@@ -41,9 +41,9 @@ class Matrix:
     def __init__(self):
         """Create a class public call webpage opener with cookie
 
-        From first login save cookie and continue use
-        Call this opener must write parameter name
-        Cookie will delete when program end
+        From first login save cookie and continue call
+        Call this global opener must write parameter name
+        Cookie, cookiehandler, opener all can inherit and call
         """
         self.cookie = http.cookiejar.LWPCookieJar()
         self.cookieHandler = urllib.request.HTTPCookieProcessor(self.cookie)
@@ -51,7 +51,7 @@ class Matrix:
         urllib.request.install_opener(self.opener)
 
     @staticmethod
-    def _login_infopreload(logincr_path):
+    def _login_preload(logincr_path):
         """Get user input username and password
 
         login.cr file example:
@@ -205,7 +205,7 @@ class Matrix:
         :param log_path:    log save path
         :return:            post way request data
         """
-        Matrix.login_bias = self._login_infopreload(dataload.LOGINCR_PATH)
+        Matrix.login_bias = self._login_preload(dataload.LOGINCR_PATH)
         # request a post key
         try:
             response = self.opener.open(
@@ -241,7 +241,6 @@ class Matrix:
         post_orderdict['password'] = Matrix.login_bias[1]
         post_orderdict['captcha'] = ""
         post_orderdict['g_recaptcha_response'] = ""
-        # if refacte here, do not change this flag
         post_orderdict['post_key'] = postkey
         post_orderdict['source'] = "pc"
         post_orderdict['ref'] = dataload.LOGIN_POSTDATA_REF
@@ -294,7 +293,7 @@ class Matrix:
         self.logprowork(log_path, log_context)
 
     @staticmethod
-    def data_sizer(whole_pattern, info_pattern, web_src):
+    def commit_spansizer(whole_pattern, info_pattern, web_src):
         """A sizer for all of images in a page
 
         :param whole_pattern:   whole info data regex compile pattern
@@ -302,8 +301,8 @@ class Matrix:
         :param web_src:         webpage source
         :return:                original target urls, image infos
         """
-        info_group_l = []
-        url_group_l = []
+        gather_info = []
+        gather_url = []
         datasrc_pattern = re.compile(dataload.DATASRC_REGEX, re.S)
         span_pattern = re.compile(dataload.SPAN_REGEX, re.S)
         img_whole_info = re.findall(whole_pattern, web_src)
@@ -311,16 +310,15 @@ class Matrix:
         # this crawler will give gif format up and crawl png or jpg
         # pixiv one repo maybe have multi-images
         for item in img_whole_info:
-            # mate thumbnail image
+            # get judge key word
             thumbnail = re.findall(datasrc_pattern, item)[0]
-            # cut judge key word
             judge_word = thumbnail[-18:]
 
             # check jpg/png or gif
             if judge_word == dataload.JUDGE_NOGIF_WORD:
                 span_nbr = re.findall(span_pattern, item)
-                # catch vaild word from thumbnail url
-                vaildWord = thumbnail[44:-18]
+                # get vaild word
+                vaild_word = thumbnail[44:-18]
 
                 # try to check multi-span images
                 if len(span_nbr) != 0:
@@ -328,23 +326,24 @@ class Matrix:
                     for _px in range(int(span_nbr[0])):
                         # set same info
                         info = re.findall(info_pattern, item)[0]
-                        info_group_l.append(info)
+                        gather_info.append(info)
                         # more pages point
-                        target_url = dataload.ORIGINAL_IMAGE_HEAD + vaildWord \
+                        target_url = dataload.ORIGINAL_IMAGE_HEAD + vaild_word \
                                      + dataload.ORIGINAL_IMAGE_TAIL(_px)
-                        url_group_l.append(target_url)
+                        gather_url.append(target_url)
+                # just only one picture in a commit
                 else:
                     info = re.findall(info_pattern, item)[0]
-                    info_group_l.append(info)
+                    gather_info.append(info)
                     # only _p0 page
-                    target_url = dataload.ORIGINAL_IMAGE_HEAD + vaildWord \
+                    target_url = dataload.ORIGINAL_IMAGE_HEAD + vaild_word \
                                  + dataload.ORIGINAL_IMAGE_TAIL(0)
-                    url_group_l.append(target_url)
+                    gather_url.append(target_url)
             # give up gif format
             else:
                 pass
 
-        return url_group_l, info_group_l
+        return gather_url, gather_info
 
     @retry
     def _save_oneimage(self, index, url, basepages, img_savepath, log_path):
@@ -361,7 +360,7 @@ class Matrix:
         proxy_handler = None
         timeout = 30
         img_datatype = 'png'
-        # artwork_id + _px
+        # name artwork_id + _px
         image_name = url[57:-4]
 
         # setting new headers

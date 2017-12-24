@@ -140,7 +140,7 @@ class RankingTop(object):
         # size info in webpage source
         imgitem_pattern = re.compile(dataload.RANKING_SECTION_REGEX, re.S)
         info_pattern = re.compile(dataload.RANKING_INFO_REGEX, re.S)
-        sizer_result = _pvmx.data_sizer(imgitem_pattern, info_pattern, web_src)
+        sizer_result = _pvmx.commit_spansizer(imgitem_pattern, info_pattern, web_src)
         # whole data cache pool
         whole_urls = sizer_result[0]
         img_infos = sizer_result[1]
@@ -282,7 +282,7 @@ class RepertoAll(object):
         image_name_pattern = re.compile(dataload.IMAGE_NAME_REGEX, re.S)
         # sizer data
         sizer_result = \
-            _pvmx.data_sizer(imgitem_pattern, image_name_pattern, web_src)
+            _pvmx.commit_spansizer(imgitem_pattern, image_name_pattern, web_src)
 
         return sizer_result
 

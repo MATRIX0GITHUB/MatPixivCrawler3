@@ -22,8 +22,8 @@ License
 Update
 ======
 
-    Version: v1p9_LTE
-    Last Update Time: 20171219pm1258
+    Version: v2p0_LTE
+    Last Update Time: 20171224pm1748
     
     This python crawler is built to crawl pixiv images
     It have two mode: RankTopN and illustRepoAll 
@@ -43,13 +43,13 @@ Platform
 Run
 ======
 
-##last python2 version:
+  last python2 version: (very old version, maintenance has been discontinued)
     
 - [pixiv-crawler](https://github.com/Neod0Matrix/pixiv-crawler)
     
     git clone https://github.com/Neod0Matrix/pixiv-crawler.git
     
-##this python3 version:
+  this python3 version:
 
 - [MatPixivCrawler3](https://github.com/Neod0Matrix/MatPixivCrawler3)
 
