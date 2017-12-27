@@ -23,7 +23,7 @@ class Matrix:
     #    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝   #
     #                                                                                                                                   #
     #    Copyright (c) 2017 @T.WKVER </MATRIX> Neod Anderjon(LeaderN)                                                                   #
-    #    Version: 2.0.0 LTE                                                                                                             #
+    #    Version: 2.1.0 LTE                                                                                                             #
     #    Code by </MATRIX>@Neod Anderjon(LeaderN)                                                                                       #
     #    MatPixivCrawler3 Help Page                                                                                                     #
     #    1.rtn  ---     RankingTopN, crawl Pixiv daily/weekly/month ranking top artworks                                                #
@@ -140,9 +140,9 @@ class Matrix:
         is_folder_existed = os.path.exists(folder)
         if not is_folder_existed:
             os.makedirs(folder)
-            log_context = 'folder create successed'
+            log_context = 'create a new folder'
         else:
-            log_context = 'the folder has already existed'
+            log_context = 'target folder has already existed'
         # remove old log file
         if os.path.exists(log_path):
             os.remove(log_path)
@@ -446,6 +446,12 @@ class Matrix:
         that is less burdensome than process creation
         Internal call
         """
+
+        # handle thread max limit
+        queue_t = []
+        MAX_LIMIT_COUNT = 100           # set max threads count
+        event_t = threading.Event()     # use event let excess threads wait
+
         def __init__(self, lock, i, img_url, basepages, img_savepath, log_path):
             """Provide class arguments
 
@@ -465,47 +471,36 @@ class Matrix:
             self.img_path = img_savepath
             self.logpath = log_path
 
-        # handle thread max limit
-        thread_queue = []
-        max_limit_threads = 500         # set max threads count 500
-        wait_event = threading.Event()  # use event let excess threads wait
-
         def run(self):
             """Overwrite threading.thread run() method
 
             :return:    none
             """
-
-            # try to create a new thread
             try:
+                # create a new thread
                 Matrix()._save_oneimage(self.i, self.img_url, self.base_pages,
                                         self.img_path, self.logpath)
             except Exception as e:
                 log_context = str(e) + "create thread failed"
                 Matrix.logprowork(log_context, self.logpath)
 
-            # set thread lock
             self.lock.acquire()
-            try:
-                self.thread_queue.remove(self)
-            except Exception as e:
-                log_context = str(e)
-                Matrix.logprowork(log_context, self.logpath)
-            # lock event handle
-            if len(self.thread_queue) == self.max_limit_threads - 1:
-                self.lock.set()
-                self.lock.clear()
+            ## self.queue_t.remove(self)
+            if len(self.queue_t) == self.MAX_LIMIT_COUNT - 1:
+                self.event_t.set()
+                self.event_t.clear()
             self.lock.release()
 
-        def newthread(self):
+        def create(self):
             """Create a new thread
 
+            It can handle more over threads create
             :return:    none
             """
             self.lock.acquire()
-            self.thread_queue.append(self)
+            self.queue_t.append(self)
             self.lock.release()
-            self.start()
+            self.start()        # finally call start() method
 
     def download_alltarget(self, urls, basepages, workdir, log_path):
         """Multi-process download all image
@@ -521,29 +516,28 @@ class Matrix:
         log_context = 'start to download %d target(s)======>' % queueLength
         self.logprowork(log_path, log_context)
 
+        aliveThreadCnt = queueLength    # here init var alive thread count
         lock = threading.Lock()
-        # here init var alive thread count
-        aliveThreadCnt = queueLength
-
         # log download elapsed time
         starttime = time.time()
-
         # create overwrite threading.Thread object
         for i, one_url in enumerate(urls):
             # handle thread create max limit
             lock.acquire()
-            if len(self._MultiThreading.thread_queue) \
-                    >= self._MultiThreading.max_limit_threads:
+            # if now all of threads count less than limit, ok
+            if len(self._MultiThreading.queue_t) \
+                    >= self._MultiThreading.MAX_LIMIT_COUNT:
                 lock.release()
                 # wait last threads work end
-                self._MultiThreading.wait_event.wait()
+                self._MultiThreading.event_t.wait()
             else:
                 lock.release()
+            # continue to create new one
             sub_thread = self._MultiThreading(lock, i, one_url,
                         basepages, workdir, log_path)
             # set every download sub-process is non-daemon process
             sub_thread.setDaemon(False)
-            sub_thread.start()
+            sub_thread.create()
 
         # parent thread wait all sub-thread end
         while aliveThreadCnt > 1:

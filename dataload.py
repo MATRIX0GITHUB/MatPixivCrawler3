@@ -11,7 +11,7 @@ PROJECT_NAME        = 'MatPixivCrawler3'
 DEVELOPER           = 'Neod Anderjon(LeaderN)'
 LABORATORY          = 'T.WKVER'
 ORGANIZATION        = '</MATRIX>'
-VERSION             = 'v2p0_LTE'
+VERSION             = 'v2p1_LTE'
 
 # define some global variable
 SHELL_BASHHEAD = PROJECT_NAME + '@' + ORGANIZATION + ':~$ '
