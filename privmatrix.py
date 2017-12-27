@@ -32,11 +32,10 @@ class Matrix:
     #####################################################################################################################################
     """
 
-    # init class variable
-    login_bias = []                 # login data: username, passwd, getway_data, agree public call
-    _proxy_hasrun_flag = False      # create proxy handler once flag, only class internal call
-    _datastream_pool = 0            # download data-stream(KB) whole pool, only class internal call
-    _alivethread_counter = 0        # multi-thread alive sub-threads count, only class internal call
+    # external can call this inherit
+    login_bias = []
+    # only this class inherit
+    _proxy_hasrun_flag, _datastream_pool, _alivethread_counter = False, 0, 0
 
     def __init__(self):
         """Create a class public call webpage opener with cookie
@@ -463,19 +462,50 @@ class Matrix:
             self.i = i
             self.img_url = img_url
             self.base_pages = basepages
-            self.imgPath = img_savepath
-            self.logPath = log_path
+            self.img_path = img_savepath
+            self.logpath = log_path
+
+        # handle thread max limit
+        thread_queue = []
+        max_limit_threads = 500         # set max threads count 500
+        wait_event = threading.Event()  # use event let excess threads wait
 
         def run(self):
             """Overwrite threading.thread run() method
 
             :return:    none
             """
-            # cancel lock release will let multi-process change to easy process
-            ## self.lock.acquire()
-            Matrix()._save_oneimage(self.i, self.img_url, self.base_pages,
-                                    self.imgPath, self.logPath)
-            ## self.lock.release()
+
+            # try to create a new thread
+            try:
+                Matrix()._save_oneimage(self.i, self.img_url, self.base_pages,
+                                        self.img_path, self.logpath)
+            except Exception as e:
+                log_context = str(e) + "create thread failed"
+                Matrix.logprowork(log_context, self.logpath)
+
+            # set thread lock
+            self.lock.acquire()
+            try:
+                self.thread_queue.remove(self)
+            except Exception as e:
+                log_context = str(e)
+                Matrix.logprowork(log_context, self.logpath)
+            # lock event handle
+            if len(self.thread_queue) == self.max_limit_threads - 1:
+                self.lock.set()
+                self.lock.clear()
+            self.lock.release()
+
+        def newthread(self):
+            """Create a new thread
+
+            :return:    none
+            """
+            self.lock.acquire()
+            self.thread_queue.append(self)
+            self.lock.release()
+            self.start()
 
     def download_alltarget(self, urls, basepages, workdir, log_path):
         """Multi-process download all image
@@ -500,13 +530,20 @@ class Matrix:
 
         # create overwrite threading.Thread object
         for i, one_url in enumerate(urls):
-            sub_thread = self._MultiThreading(lock, i, one_url, basepages,
-                                              workdir, log_path)
+            # handle thread create max limit
+            lock.acquire()
+            if len(self._MultiThreading.thread_queue) \
+                    >= self._MultiThreading.max_limit_threads:
+                lock.release()
+                # wait last threads work end
+                self._MultiThreading.wait_event.wait()
+            else:
+                lock.release()
+            sub_thread = self._MultiThreading(lock, i, one_url,
+                        basepages, workdir, log_path)
             # set every download sub-process is non-daemon process
             sub_thread.setDaemon(False)
             sub_thread.start()
-            # confirm thread has been created, delay cannot too long
-            ## time.sleep(0.1)
 
         # parent thread wait all sub-thread end
         while aliveThreadCnt > 1:
